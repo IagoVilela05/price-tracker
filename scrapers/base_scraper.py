@@ -91,6 +91,12 @@ class BaseScraper(ABC):
             # Navega até a URL
             page.goto(self.url, wait_until="domcontentloaded")
             
+            # Detecção de tela de desafio JS (ex: Akamai/Anubis do Mercado Livre)
+            # Se presente, aguarda a execução do desafio e o redirecionamento automático
+            html_init = page.content()
+            if "micro-landing-container" in html_init or "noscript-message" in html_init or "continue-button" in html_init or "snoopy-script" in html_init:
+                page.wait_for_timeout(5000)
+            
             # Preenchimento de CEP opcional
             if setup_cep and DEFAULT_CEP and cep_selector and cep_input_selector and cep_submit_selector:
                 try:
