@@ -1,0 +1,20 @@
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+
+# Local configuration and credentials
+.env
+.env*.local
+
+# Database
+price_tracker.db
+price_tracker.db-journal
+
+# Node / React
+frontend/node_modules/
+frontend/dist/
+frontend/.eslintcache
+
+# Logs
+*.log
