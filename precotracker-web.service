@@ -1,0 +1,13 @@
+[Unit]
+Description=PreçoAlvo AI - FastAPI Web Server
+After=network.target
+
+[Service]
+Type=simple
+User=iago
+WorkingDirectory=/home/iago/Documents/Pessoal/price-tracker
+ExecStart=/home/iago/Documents/Pessoal/price-tracker/.venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

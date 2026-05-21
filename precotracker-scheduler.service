@@ -1,0 +1,13 @@
+[Unit]
+Description=PreçoAlvo AI - Local Scheduler Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=iago
+WorkingDirectory=/home/iago/Documents/Pessoal/price-tracker
+ExecStart=/home/iago/Documents/Pessoal/price-tracker/.venv/bin/python scheduler.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
