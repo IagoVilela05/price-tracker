@@ -129,6 +129,8 @@ class TerabyteScraper(BaseScraper):
         # Preço parcelado na Terabyte
         price_installments = 0.0
         inst_selectors = [
+            ".val-parc",
+            ".valParc",
             "#valParc",
             "span[id='valParc']",
             ".preco-prazo",
@@ -156,7 +158,15 @@ class TerabyteScraper(BaseScraper):
             for el in soup.find_all(["span", "div", "p"]):
                 if self.is_recommendation(el):
                     continue
+                # Evita selecionar preços riscados / antigos
+                if el.name == "del" or el.find_parent("del") or el.name == "s" or el.find_parent("s"):
+                    continue
+                classes = " ".join(el.get("class", [])).lower() if el.get("class") else ""
+                if "strike" in classes or "old" in classes:
+                    continue
                 txt = el.get_text()
+                if "de:" in txt.lower() and "por:" in txt.lower():
+                    continue
                 if ("no cartão" in txt.lower() or "a prazo" in txt.lower() or "sem juros" in txt.lower() or "parcelado" in txt.lower()) and "R$" in txt:
                     match = re.search(r"R\$\s*[\d\.,]+", txt)
                     if match:

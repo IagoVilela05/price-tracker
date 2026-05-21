@@ -71,6 +71,8 @@ class KabumScraper(BaseScraper):
                 
         # Preço parcelado/regular
         price_installments = 0.0
+        
+        # 1. Procurar via seletores CSS específicos
         inst_selectors = [
             ".regularPrice",
             "[class*='regularPrice']",
@@ -83,10 +85,35 @@ class KabumScraper(BaseScraper):
                 inst_str = inst_el.get_text().strip()
                 if inst_str:
                     val = self.clean_price(inst_str)
-                    if val > 0:
+                    if val > price:
                         price_installments = val
                         break
                         
+        # 2. Procurar via busca textual robusta (evitando blocos de recomendações)
+        if price_installments == 0.0:
+            import re
+            for el in soup.find_all(["b", "span", "div", "p"]):
+                if self.is_recommendation(el):
+                    continue
+                # Evita tags de preço antigo / riscado
+                if el.name in ["del", "s"] or el.find_parent(["del", "s"]):
+                    continue
+                classes = " ".join(el.get("class", [])).lower() if el.get("class") else ""
+                if "strike" in classes or "old" in classes or "strikethrough" in classes:
+                    continue
+                    
+                txt = el.get_text().strip()
+                parent_text = el.parent.get_text() if el.parent else ""
+                full_text = txt + " | " + parent_text
+                
+                if ("em até" in full_text.lower() or "sem juros" in full_text.lower() or "no cartão" in full_text.lower() or "a prazo" in full_text.lower()) and "R$" in txt:
+                    match = re.search(r"R\$\s*[\d\.,\s]+", txt)
+                    if match:
+                        val = self.clean_price(match.group(0))
+                        # Queremos o menor valor parcelado válido que seja maior que o preço Pix
+                        if val > price and (price_installments == 0.0 or val < price_installments):
+                            price_installments = val
+                            
         if price_installments <= 0.0 or price_installments < price:
             price_installments = price
 
