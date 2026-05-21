@@ -1,6 +1,6 @@
-# 🎯 PreçoAlvo AI - Monitorador Inteligente de Preços de Hardware
+# 🎯 PriceTracker - Monitorador Inteligente de Preços de Hardware
 
-O **PreçoAlvo AI** é um sistema completo, robusto e de altíssima fidelidade projetado para monitorar preços de componentes de hardware em tempo real, cobrindo as maiores varejistas brasileiras. O sistema é capaz de diferenciar preços **À Vista (Pix/Boleto)** de preços **Parcelados (Cartão de Crédito)**, gerar gráficos estatísticos interativos de evolução histórica de preços e enviar alertas instantâneos de descontos direto para o seu celular via Telegram.
+O **PriceTracker** é um sistema completo, robusto e de altíssima fidelidade projetado para monitorar preços de componentes de hardware em tempo real, cobrindo as maiores varejistas brasileiras. O sistema é capaz de diferenciar preços **À Vista (Pix/Boleto)** de preços **Parcelados (Cartão de Crédito)**, gerar gráficos estatísticos interativos de evolução histórica de preços e enviar alertas instantâneos de descontos direto para o seu celular via Telegram.
 
 Desenvolvido com uma arquitetura moderna e desacoplada em **React (Vite)** e **Python (FastAPI)**, o projeto roda de forma 100% autônoma em segundo plano (como serviços de sistema daemon) na sua máquina Linux.
 
@@ -99,7 +99,7 @@ cd ..
 
 ## 💻 Modos de Execução
 
-Você tem três opções para rodar o **PreçoAlvo AI** no seu computador:
+Você tem três opções para rodar o **PriceTracker** no seu computador:
 
 ### Opção A: Execução Local Unificada (Manual)
 Para testar a API REST e a interface web juntas de forma simples:

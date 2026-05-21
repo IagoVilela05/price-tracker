@@ -1,5 +1,5 @@
 [Unit]
-Description=PreçoAlvo AI - FastAPI Web Server
+Description=PriceTracker - FastAPI Web Server
 After=network.target
 
 [Service]

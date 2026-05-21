@@ -1,5 +1,5 @@
 [Unit]
-Description=PreçoAlvo AI - Telegram Two-Way Bot
+Description=PriceTracker - Telegram Two-Way Bot
 After=network.target
 
 [Service]

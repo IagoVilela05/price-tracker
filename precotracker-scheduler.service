@@ -1,5 +1,5 @@
 [Unit]
-Description=PreçoAlvo AI - Local Scheduler Daemon
+Description=PriceTracker - Local Scheduler Daemon
 After=network.target
 
 [Service]

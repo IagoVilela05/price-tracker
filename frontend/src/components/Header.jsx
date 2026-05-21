@@ -8,7 +8,7 @@ export default function Header({ isScanning, onSync, statusText }) {
           <i className="fa-solid fa-radar fa-fade logo-icon"></i>
         </div>
         <div>
-          <h1 class="app-title">PreçoAlvo <span className="accent-text">AI</span></h1>
+          <h1 className="app-title">Price<span className="accent-text">Tracker</span></h1>
           <p className="app-subtitle">Monitoramento Inteligente de Hardware (React SPA)</p>
         </div>
       </div>

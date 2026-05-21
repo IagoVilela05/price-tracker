@@ -84,7 +84,7 @@ def get_updates(offset: int = None, timeout: int = 30) -> list:
 def handle_start(chat_id: int):
     """Responde ao comando /start ou /ajuda."""
     help_text = (
-        "👋 <b>Bem-vindo ao PreçoAlvo AI!</b>\n\n"
+        "👋 <b>Bem-vindo ao PriceTracker!</b>\n\n"
         "Eu sou o seu robô monitorador de preços local. Através de mim você pode gerenciar seus produtos e receber alertas em tempo real!\n\n"
         "📋 <b>Comandos Disponíveis:</b>\n"
         "🔹 /list - Lista todos os produtos sendo monitorados atualmente.\n"
