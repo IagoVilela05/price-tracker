@@ -42,9 +42,17 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
     <div className={`product-card ${isBeaten ? 'target-beaten' : ''}`}>
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <span className={`store-badge ${product.store.toLowerCase()}`} style={{ marginBottom: 0 }}>
+          <a 
+            href={product.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`store-badge ${product.store.toLowerCase()}`} 
+            style={{ marginBottom: 0, textDecoration: 'none', cursor: 'pointer' }}
+            title="Ir para a loja"
+          >
             {getStoreIcon(product.store)} {getStoreNameFormatted(product.store)}
-          </span>
+            <i className="fa-solid fa-up-right-from-square" style={{ fontSize: '9px', opacity: 0.7, marginLeft: '2px' }}></i>
+          </a>
           <button 
             onClick={() => {
               const newName = prompt("Editar nome / apelido do produto:", product.name);
@@ -79,7 +87,16 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
             <i className="fa-solid fa-pen"></i>
           </button>
         </div>
-        <h4 className="product-name" title={product.name}>{product.name}</h4>
+        <a 
+          href={product.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="product-name-link"
+          style={{ textDecoration: 'none', color: 'inherit' }}
+          title="Ir para a loja"
+        >
+          <h4 className="product-name" title={product.name}>{product.name}</h4>
+        </a>
       </div>
       
       <div>
