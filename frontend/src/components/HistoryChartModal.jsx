@@ -135,6 +135,21 @@ export default function HistoryChartModal({ active, onClose, chartData, product 
           font: {
             family: "'Outfit', sans-serif",
             weight: '600'
+          },
+          generateLabels: (chart) => {
+            const datasets = chart.data.datasets;
+            return datasets.map((dataset, i) => {
+              return {
+                text: dataset.label,
+                datasetIndex: i,
+                strokeStyle: dataset.borderColor,
+                fillStyle: dataset.borderColor,
+                lineWidth: 3,
+                hidden: !chart.isDatasetVisible(i),
+                lineDash: dataset.borderDash || [],
+                pointStyle: 'line'
+              };
+            });
           }
         }
       },
@@ -207,15 +222,15 @@ export default function HistoryChartModal({ active, onClose, chartData, product 
           <div className="chart-stats-summary">
             <div className="chart-stat-item">
               <span className="chart-stat-label">{hasInstallmentDiff ? 'Menor (À Vista)' : 'Menor Preço'}</span>
-              <span className="chart-stat-val text-emerald">{formatBRL(minPrice)}</span>
+              <span className="chart-stat-val text-purple">{formatBRL(minPrice)}</span>
             </div>
             <div className="chart-stat-item">
               <span className="chart-stat-label">{hasInstallmentDiff ? 'Média (À Vista)' : 'Média de Preço'}</span>
-              <span className="chart-stat-val text-cyan">{formatBRL(avgPrice)}</span>
+              <span className="chart-stat-val text-purple">{formatBRL(avgPrice)}</span>
             </div>
             <div className="chart-stat-item">
               <span className="chart-stat-label">Preço Alvo</span>
-              <span className="chart-stat-val text-purple">{formatBRL(chartData.target_price)}</span>
+              <span className="chart-stat-val text-emerald">{formatBRL(chartData.target_price)}</span>
             </div>
           </div>
         </div>

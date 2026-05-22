@@ -322,6 +322,8 @@ body {
 
 .text-emerald { color: var(--accent-emerald); }
 .text-cyan { color: var(--accent-cyan); }
+.text-purple { color: var(--accent-primary); }
+
 
 .stat-bg-glow {
     position: absolute;
