@@ -72,12 +72,13 @@ class AmazonScraper(BaseScraper):
         for sel in best_offer_selectors:
             el = soup.select_one(sel)
             if el:
-                txt = el.get_text().replace("\xa0", " ").strip()
+                raw_txt = el.get_text().replace("\xa0", " ").strip()
+                # Normaliza múltiplos espaços e quebras de linha
+                txt = " ".join(raw_txt.split())
+                # Junta dígitos separados por vírgula ou ponto (ex: "77 , 26" -> "77,26")
+                txt = re.sub(r"(\d+)\s*([.,])\s*(\d+)", r"\1\2\3", txt)
+                
                 if "R$" in txt:
-                    # Evita contêineres que concatenaram múltiplos preços
-                    if txt.count("R$") > 1:
-                        continue
-                        
                     # Encontra o valor total após "ou R$"
                     match = re.search(r"ou\s*R\$\s*([\d\.,]+)", txt)
                     if match:
@@ -86,7 +87,7 @@ class AmazonScraper(BaseScraper):
                             price_installments = val
                             break
                     # Calcula o valor total a partir do parcelamento (ex: 10x de R$ 135,32)
-                    match_calc = re.search(r"(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
+                    match_calc = re.search(r"(?<![\d\.,])(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
                     if match_calc:
                         qty = int(match_calc.group(1))
                         if qty <= 24: # Limite seguro para evitar lixo de concatenação
@@ -101,19 +102,20 @@ class AmazonScraper(BaseScraper):
             for el in soup.find_all(["span", "p", "b", "strong", "div"]):
                 if self.is_recommendation(el):
                     continue
-                txt = el.get_text().replace("\xa0", " ").strip()
+                raw_txt = el.get_text().replace("\xa0", " ").strip()
+                # Normaliza múltiplos espaços e quebras de linha
+                txt = " ".join(raw_txt.split())
+                # Junta dígitos separados por vírgula ou ponto (ex: "77 , 26" -> "77,26")
+                txt = re.sub(r"(\d+)\s*([.,])\s*(\d+)", r"\1\2\3", txt)
+                
                 if len(txt) < 300 and ("sem juros" in txt.lower() or "no cartão" in txt.lower() or "a prazo" in txt.lower() or "parcelado" in txt.lower() or "em até" in txt.lower() or "ou R$" in txt) and "R$" in txt:
-                    # Evita contêineres que concatenaram múltiplos preços
-                    if txt.count("R$") > 1:
-                        continue
-                        
                     match = re.search(r"ou\s*R\$\s*([\d\.,]+)", txt)
                     if match:
                         val = self.clean_price(match.group(1))
                         if val > price:
                             price_installments = val
                             break
-                    match_calc = re.search(r"(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
+                    match_calc = re.search(r"(?<![\d\.,])(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
                     if match_calc:
                         qty = int(match_calc.group(1))
                         if qty <= 24: # Limite seguro

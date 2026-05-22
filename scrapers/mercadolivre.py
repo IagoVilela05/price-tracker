@@ -91,18 +91,21 @@ class MercadoLivreScraper(BaseScraper):
             container = soup.select_one(sel)
             if container:
                 for el in container.find_all(["span", "p", "div"]):
-                    txt = el.get_text().replace("\xa0", " ").strip()
+                    raw_txt = el.get_text().replace("\xa0", " ").strip()
+                    # Normaliza múltiplos espaços e quebras de linha
+                    txt = " ".join(raw_txt.split())
+                    # Junta dígitos separados por vírgula ou ponto (ex: "77 , 26" -> "77,26")
+                    txt = re.sub(r"(\d+)\s*([.,])\s*(\d+)", r"\1\2\3", txt)
+                    
                     if len(txt) < 300 and ("sem juros" in txt.lower() or "em até" in txt.lower() or "x" in txt.lower()) and "R$" in txt:
-                        # Evita contêineres que concatenaram múltiplos preços (ex: à vista e parcelado)
-                        if txt.count("R$") > 1:
-                            continue
-                            
                         match_total = re.search(r"ou\s*R\$\s*([\d\.,]+)", txt)
                         if match_total:
                             val = self.clean_price(match_total.group(1))
                             if val > price and (price_installments == 0.0 or val > price_installments):
                                 price_installments = val
-                        match_calc = re.search(r"(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
+                        # Usa lookbehind negativo (?<![\d\.,]) para impedir que dígitos de preços anteriores colados sem espaço 
+                        # sejam incorporados como a quantidade de parcelas (ex: R$764,1010x -> evita extrair 010x ou 10x bugado)
+                        match_calc = re.search(r"(?<![\d\.,])(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
                         if match_calc:
                             qty = int(match_calc.group(1))
                             if qty <= 24: # Limite seguro para evitar lixo de concatenação
@@ -131,18 +134,19 @@ class MercadoLivreScraper(BaseScraper):
                 if is_other_seller:
                     continue
                     
-                txt = el.get_text().replace("\xa0", " ").strip()
+                raw_txt = el.get_text().replace("\xa0", " ").strip()
+                # Normaliza múltiplos espaços e quebras de linha
+                txt = " ".join(raw_txt.split())
+                # Junta dígitos separados por vírgula ou ponto (ex: "77 , 26" -> "77,26")
+                txt = re.sub(r"(\d+)\s*([.,])\s*(\d+)", r"\1\2\3", txt)
+                
                 if len(txt) < 300 and ("sem juros" in txt.lower() or "no cartão" in txt.lower() or "a prazo" in txt.lower() or "parcelado" in txt.lower() or "em até" in txt.lower() or "ou R$" in txt) and "R$" in txt:
-                    # Evita contêineres que concatenaram múltiplos preços
-                    if txt.count("R$") > 1:
-                        continue
-                        
                     match_total = re.search(r"ou\s*R\$\s*([\d\.,]+)", txt)
                     if match_total:
                         val = self.clean_price(match_total.group(1))
                         if val > price and (price_installments == 0.0 or val > price_installments):
                             price_installments = val
-                    match_calc = re.search(r"(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
+                    match_calc = re.search(r"(?<![\d\.,])(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
                     if match_calc:
                         qty = int(match_calc.group(1))
                         if qty <= 24:
