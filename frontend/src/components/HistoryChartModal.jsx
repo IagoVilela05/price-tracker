@@ -130,6 +130,8 @@ export default function HistoryChartModal({ active, onClose, chartData, product 
         position: 'top',
         labels: {
           color: '#f8fafc',
+          usePointStyle: true,
+          pointStyle: 'line',
           font: {
             family: "'Outfit', sans-serif",
             weight: '600'
