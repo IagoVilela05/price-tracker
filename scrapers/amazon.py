@@ -59,9 +59,66 @@ class AmazonScraper(BaseScraper):
             
         price = self.clean_price(price_str) if price_str else 0.0
         
+        # Extração de preço parcelado
+        price_installments = 0.0
+        import re
+        
+        # 1. Tenta buscar em seletores específicos de melhor oferta de parcelamento
+        best_offer_selectors = [
+            "#best-offer-string-cc",
+            ".best-offer-name",
+            "[id^='best-offer-string-']"
+        ]
+        for sel in best_offer_selectors:
+            el = soup.select_one(sel)
+            if el:
+                txt = el.get_text().replace("\xa0", " ").strip()
+                if "R$" in txt:
+                    # Encontra o valor total após "ou R$"
+                    match = re.search(r"ou\s*R\$\s*([\d\.,]+)", txt)
+                    if match:
+                        val = self.clean_price(match.group(1))
+                        if val > price:
+                            price_installments = val
+                            break
+                    # Calcula o valor total a partir do parcelamento (ex: 10x de R$ 135,32)
+                    match_calc = re.search(r"(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
+                    if match_calc:
+                        qty = int(match_calc.group(1))
+                        val_unit = self.clean_price(match_calc.group(2))
+                        calc_val = qty * val_unit
+                        if calc_val > price:
+                            price_installments = calc_val
+                            break
+                            
+        # 2. Varredura geral no corpo para buscar padrões folha como "sem juros" ou "em até"
+        if price_installments == 0.0:
+            for el in soup.find_all(["span", "p", "b", "strong", "div"]):
+                if self.is_recommendation(el):
+                    continue
+                txt = el.get_text().replace("\xa0", " ").strip()
+                if len(txt) < 300 and ("sem juros" in txt.lower() or "no cartão" in txt.lower() or "a prazo" in txt.lower() or "parcelado" in txt.lower() or "em até" in txt.lower() or "ou R$" in txt) and "R$" in txt:
+                    match = re.search(r"ou\s*R\$\s*([\d\.,]+)", txt)
+                    if match:
+                        val = self.clean_price(match.group(1))
+                        if val > price:
+                            price_installments = val
+                            break
+                    match_calc = re.search(r"(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
+                    if match_calc:
+                        qty = int(match_calc.group(1))
+                        val_unit = self.clean_price(match_calc.group(2))
+                        calc_val = qty * val_unit
+                        if calc_val > price:
+                            price_installments = calc_val
+                            break
+                            
+        if price_installments <= 0.0 or price_installments < price:
+            price_installments = price
+            
         return {
             "name": name or "Produto Amazon",
             "price": price,
-            "price_installments": price,
+            "price_installments": price_installments,
             "available": available and price > 0
         }
