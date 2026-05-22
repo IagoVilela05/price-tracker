@@ -294,7 +294,7 @@ def get_dashboard_kpi_stats():
     }
 
 # Monta a pasta de arquivos estáticos para servir o front-end compilado do React (SPA)
-dist_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend/dist")
+dist_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend/dist")
 if not os.path.exists(dist_dir):
     os.makedirs(dist_dir, exist_ok=True)
     with open(os.path.join(dist_dir, "index.html"), "w", encoding="utf-8") as f:
