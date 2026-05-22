@@ -74,6 +74,10 @@ class AmazonScraper(BaseScraper):
             if el:
                 txt = el.get_text().replace("\xa0", " ").strip()
                 if "R$" in txt:
+                    # Evita contêineres que concatenaram múltiplos preços
+                    if txt.count("R$") > 1:
+                        continue
+                        
                     # Encontra o valor total após "ou R$"
                     match = re.search(r"ou\s*R\$\s*([\d\.,]+)", txt)
                     if match:
@@ -85,11 +89,12 @@ class AmazonScraper(BaseScraper):
                     match_calc = re.search(r"(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
                     if match_calc:
                         qty = int(match_calc.group(1))
-                        val_unit = self.clean_price(match_calc.group(2))
-                        calc_val = qty * val_unit
-                        if calc_val > price:
-                            price_installments = calc_val
-                            break
+                        if qty <= 24: # Limite seguro para evitar lixo de concatenação
+                            val_unit = self.clean_price(match_calc.group(2))
+                            calc_val = qty * val_unit
+                            if calc_val > price:
+                                price_installments = calc_val
+                                break
                             
         # 2. Varredura geral no corpo para buscar padrões folha como "sem juros" ou "em até"
         if price_installments == 0.0:
@@ -98,6 +103,10 @@ class AmazonScraper(BaseScraper):
                     continue
                 txt = el.get_text().replace("\xa0", " ").strip()
                 if len(txt) < 300 and ("sem juros" in txt.lower() or "no cartão" in txt.lower() or "a prazo" in txt.lower() or "parcelado" in txt.lower() or "em até" in txt.lower() or "ou R$" in txt) and "R$" in txt:
+                    # Evita contêineres que concatenaram múltiplos preços
+                    if txt.count("R$") > 1:
+                        continue
+                        
                     match = re.search(r"ou\s*R\$\s*([\d\.,]+)", txt)
                     if match:
                         val = self.clean_price(match.group(1))
@@ -107,11 +116,12 @@ class AmazonScraper(BaseScraper):
                     match_calc = re.search(r"(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
                     if match_calc:
                         qty = int(match_calc.group(1))
-                        val_unit = self.clean_price(match_calc.group(2))
-                        calc_val = qty * val_unit
-                        if calc_val > price:
-                            price_installments = calc_val
-                            break
+                        if qty <= 24: # Limite seguro
+                            val_unit = self.clean_price(match_calc.group(2))
+                            calc_val = qty * val_unit
+                            if calc_val > price:
+                                price_installments = calc_val
+                                break
                             
         if price_installments <= 0.0 or price_installments < price:
             price_installments = price

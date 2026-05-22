@@ -93,6 +93,10 @@ class MercadoLivreScraper(BaseScraper):
                 for el in container.find_all(["span", "p", "div"]):
                     txt = el.get_text().replace("\xa0", " ").strip()
                     if len(txt) < 300 and ("sem juros" in txt.lower() or "em até" in txt.lower() or "x" in txt.lower()) and "R$" in txt:
+                        # Evita contêineres que concatenaram múltiplos preços (ex: à vista e parcelado)
+                        if txt.count("R$") > 1:
+                            continue
+                            
                         match_total = re.search(r"ou\s*R\$\s*([\d\.,]+)", txt)
                         if match_total:
                             val = self.clean_price(match_total.group(1))
@@ -101,10 +105,11 @@ class MercadoLivreScraper(BaseScraper):
                         match_calc = re.search(r"(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
                         if match_calc:
                             qty = int(match_calc.group(1))
-                            val_unit = self.clean_price(match_calc.group(2))
-                            calc_val = qty * val_unit
-                            if calc_val > price and (price_installments == 0.0 or calc_val > price_installments):
-                                price_installments = calc_val
+                            if qty <= 24: # Limite seguro para evitar lixo de concatenação
+                                val_unit = self.clean_price(match_calc.group(2))
+                                calc_val = qty * val_unit
+                                if calc_val > price and (price_installments == 0.0 or calc_val > price_installments):
+                                    price_installments = calc_val
                 if price_installments > 0.0:
                     break
                     
@@ -128,6 +133,10 @@ class MercadoLivreScraper(BaseScraper):
                     
                 txt = el.get_text().replace("\xa0", " ").strip()
                 if len(txt) < 300 and ("sem juros" in txt.lower() or "no cartão" in txt.lower() or "a prazo" in txt.lower() or "parcelado" in txt.lower() or "em até" in txt.lower() or "ou R$" in txt) and "R$" in txt:
+                    # Evita contêineres que concatenaram múltiplos preços
+                    if txt.count("R$") > 1:
+                        continue
+                        
                     match_total = re.search(r"ou\s*R\$\s*([\d\.,]+)", txt)
                     if match_total:
                         val = self.clean_price(match_total.group(1))
@@ -136,10 +145,11 @@ class MercadoLivreScraper(BaseScraper):
                     match_calc = re.search(r"(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d\.,]+)", txt)
                     if match_calc:
                         qty = int(match_calc.group(1))
-                        val_unit = self.clean_price(match_calc.group(2))
-                        calc_val = qty * val_unit
-                        if calc_val > price and (price_installments == 0.0 or calc_val > price_installments):
-                            price_installments = calc_val
+                        if qty <= 24:
+                            val_unit = self.clean_price(match_calc.group(2))
+                            calc_val = qty * val_unit
+                            if calc_val > price and (price_installments == 0.0 or calc_val > price_installments):
+                                price_installments = calc_val
                             
         if price_installments <= 0.0 or price_installments < price:
             price_installments = price
