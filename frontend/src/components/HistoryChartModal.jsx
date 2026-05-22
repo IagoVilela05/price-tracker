@@ -64,6 +64,7 @@ export default function HistoryChartModal({ active, onClose, chartData, product 
 
   // Stats
   const minPrice = Math.min(...pricePoints);
+  const minInstallmentPrice = Math.min(...priceInstallmentPoints);
   const avgPrice = pricePoints.reduce((acc, p) => acc + p, 0) / pricePoints.length;
 
   // ChartJS Font & Theme Settings
@@ -147,7 +148,9 @@ export default function HistoryChartModal({ active, onClose, chartData, product 
                 lineWidth: 3,
                 hidden: !chart.isDatasetVisible(i),
                 lineDash: dataset.borderDash || [],
-                pointStyle: 'line'
+                pointStyle: 'line',
+                fontColor: '#f8fafc',
+                color: '#f8fafc'
               };
             });
           }
@@ -225,8 +228,17 @@ export default function HistoryChartModal({ active, onClose, chartData, product 
               <span className="chart-stat-val text-purple">{formatBRL(minPrice)}</span>
             </div>
             <div className="chart-stat-item">
-              <span className="chart-stat-label">{hasInstallmentDiff ? 'Média (À Vista)' : 'Média de Preço'}</span>
-              <span className="chart-stat-val text-purple">{formatBRL(avgPrice)}</span>
+              {hasInstallmentDiff ? (
+                <>
+                  <span className="chart-stat-label">Menor (Parcelado)</span>
+                  <span className="chart-stat-val text-cyan">{formatBRL(minInstallmentPrice)}</span>
+                </>
+              ) : (
+                <>
+                  <span className="chart-stat-label">Média de Preço</span>
+                  <span className="chart-stat-val text-purple">{formatBRL(avgPrice)}</span>
+                </>
+              )}
             </div>
             <div className="chart-stat-item">
               <span className="chart-stat-label">Preço Alvo</span>
