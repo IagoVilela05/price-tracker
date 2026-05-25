@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=simple
 User=iago
-WorkingDirectory=/home/iago/Documents/Pessoal/price-tracker/backend
-ExecStart=/home/iago/Documents/Pessoal/price-tracker/.venv/bin/python scheduler.py
+WorkingDirectory=/home/iago/Documentos/Pessoal/price-tracker/backend
+ExecStart=/home/iago/Documentos/Pessoal/price-tracker/.venv/bin/python scheduler.py
 Restart=on-failure
 
 [Install]
