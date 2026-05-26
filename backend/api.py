@@ -16,7 +16,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from database.db_manager import (
     init_db, add_product, get_all_products, get_product,
     delete_product, add_price_reading, get_last_price, get_price_history,
-    get_price_stats, update_product_name, get_last_price_installments
+    get_price_stats, update_product_name, get_last_price_installments,
+    update_product_collection
 )
 from scrapers import get_scraper_class_for_url
 from main import run_price_check
@@ -45,9 +46,13 @@ IS_SCANNING = False
 class ProductCreate(BaseModel):
     url: str
     target_price: float
+    collection: str | None = None
 
 class ProductNameUpdate(BaseModel):
     name: str
+
+class ProductCollectionUpdate(BaseModel):
+    collection: str | None = None
 
 class ProductResponse(BaseModel):
     id: int
@@ -56,6 +61,7 @@ class ProductResponse(BaseModel):
     url: str
     target_price: float
     created_at: str
+    collection: str | None = None
     last_price: float = None
     last_price_installments: float = None
     stats: dict = None
@@ -87,6 +93,7 @@ def list_products():
             url=prod["url"],
             target_price=prod["target_price"],
             created_at=prod["created_at"],
+            collection=prod.get("collection"),
             last_price=last_price,
             last_price_installments=last_price_installments,
             stats=stats
@@ -118,6 +125,7 @@ def get_single_product(product_id: int):
         url=prod["url"],
         target_price=prod["target_price"],
         created_at=prod["created_at"],
+        collection=prod.get("collection"),
         last_price=last_price,
         last_price_installments=last_price_installments,
         stats=stats
@@ -153,7 +161,8 @@ def create_product(payload: ProductCreate):
             name=res["name"],
             store=scraper_cls.__name__.replace("Scraper", ""),
             url=url_str,
-            target_price=payload.target_price
+            target_price=payload.target_price,
+            collection=payload.collection
         )
         
         # 4. Grava a leitura inicial do preço
@@ -168,6 +177,7 @@ def create_product(payload: ProductCreate):
             url=url_str,
             target_price=payload.target_price,
             created_at=str(os.environ.get("CURRENT_TIME", "Agora")),
+            collection=payload.collection,
             last_price=res["price"],
             last_price_installments=price_inst,
             stats={"avg_price": res["price"], "min_price": res["price"], "count": 1}
@@ -203,6 +213,20 @@ def update_single_product_name(product_id: int, payload: ProductNameUpdate):
         
     update_product_name(product_id, new_name)
     return {"message": "Nome do produto atualizado com sucesso.", "name": new_name}
+
+@app.patch("/api/products/{product_id}/collection")
+def update_single_product_collection(product_id: int, payload: ProductCollectionUpdate):
+    """Atualiza a coleção associada a um produto."""
+    prod = get_product(product_id)
+    if not prod:
+        raise HTTPException(status_code=404, detail="Produto não encontrado.")
+    
+    new_collection = payload.collection.strip() if payload.collection else None
+    if new_collection == "":
+        new_collection = None
+        
+    update_product_collection(product_id, new_collection)
+    return {"message": "Coleção do produto atualizada com sucesso.", "collection": new_collection}
 
 @app.get("/api/products/{product_id}/history")
 def get_product_price_chart_history(product_id: int):

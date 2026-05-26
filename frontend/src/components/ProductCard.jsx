@@ -28,7 +28,7 @@ const getStoreNameFormatted = (store) => {
   return names[store.toLowerCase()] || store;
 };
 
-export default function ProductCard({ product, onDelete, onShowHistory, onRename }) {
+export default function ProductCard({ product, onDelete, onShowHistory, onRename, onUpdateCollection }) {
   const isBeaten = product.last_price && product.last_price <= product.target_price;
   
   // Calculate variations
@@ -41,51 +41,95 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
   return (
     <div className={`product-card ${isBeaten ? 'target-beaten' : ''}`}>
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <a 
-            href={product.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`store-badge ${product.store.toLowerCase()}`} 
-            style={{ marginBottom: 0, textDecoration: 'none', cursor: 'pointer' }}
-            title="Ir para a loja"
-          >
-            {getStoreIcon(product.store)} {getStoreNameFormatted(product.store)}
-            <i className="fa-solid fa-up-right-from-square" style={{ fontSize: '9px', opacity: 0.7, marginLeft: '2px' }}></i>
-          </a>
-          <button 
-            onClick={() => {
-              const newName = prompt("Editar nome / apelido do produto:", product.name);
-              if (newName !== null) {
-                onRename(product.id, newName);
-              }
-            }} 
-            className="rename-btn"
-            title="Editar apelido"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              fontSize: '12px',
-              padding: '4px 6px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '4px',
-              transition: 'var(--transition-smooth)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = 'var(--accent-cyan)';
-              e.currentTarget.style.background = 'rgba(0, 240, 255, 0.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = 'var(--text-muted)';
-              e.currentTarget.style.background = 'transparent';
-            }}
-          >
-            <i className="fa-solid fa-pen"></i>
-          </button>
+        <div className="product-card-header-row">
+          <div className="product-badges-col">
+            <a 
+              href={product.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`store-badge ${product.store.toLowerCase()}`} 
+              style={{ marginBottom: 0, textDecoration: 'none', cursor: 'pointer' }}
+              title="Ir para a loja"
+            >
+              {getStoreIcon(product.store)} {getStoreNameFormatted(product.store)}
+              <i className="fa-solid fa-up-right-from-square" style={{ fontSize: '9px', opacity: 0.7, marginLeft: '2px' }}></i>
+            </a>
+            {product.collection && (
+              <span className="product-collection-badge" title="Coleção / Grupo">
+                <i className="fa-solid fa-folder" style={{ marginRight: '4px' }}></i> {product.collection}
+              </span>
+            )}
+          </div>
+          
+          <div className="product-actions-col">
+            <button 
+              onClick={() => {
+                const newColl = prompt("Editar coleção do produto (deixe em branco para sem coleção):", product.collection || "");
+                if (newColl !== null) {
+                   onUpdateCollection(product.id, newColl.trim() || null);
+                }
+              }} 
+              className="collection-edit-btn"
+              title="Editar Coleção"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                fontSize: '12px',
+                padding: '4px 6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '4px',
+                transition: 'var(--transition-smooth)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'hsl(263, 90%, 75%)';
+                e.currentTarget.style.background = 'rgba(138, 43, 226, 0.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-muted)';
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <i className="fa-solid fa-folder-open"></i>
+            </button>
+
+            <button 
+              onClick={() => {
+                const newName = prompt("Editar nome / apelido do produto:", product.name);
+                if (newName !== null) {
+                  onRename(product.id, newName);
+                }
+              }} 
+              className="rename-btn"
+              title="Editar apelido"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                fontSize: '12px',
+                padding: '4px 6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '4px',
+                transition: 'var(--transition-smooth)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--accent-cyan)';
+                e.currentTarget.style.background = 'rgba(0, 240, 255, 0.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-muted)';
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <i className="fa-solid fa-pen"></i>
+            </button>
+          </div>
         </div>
         <a 
           href={product.url}

@@ -9,6 +9,7 @@ export default function App() {
   // Global State
   const [productsList, setProductsList] = useState([]);
   const [activeStoreFilter, setActiveStoreFilter] = useState('all');
+  const [activeCollectionFilter, setActiveCollectionFilter] = useState('all');
   const [isScanning, setIsScanning] = useState(false);
   const [statusText, setStatusText] = useState('Sistema Pronto');
   
@@ -180,6 +181,25 @@ export default function App() {
     }
   };
 
+  // Update Product Collection
+  const handleUpdateCollection = async (id, collection) => {
+    try {
+      const res = await fetch(`${API_URL}/products/${id}/collection`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ collection: collection })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Erro ao atualizar coleção');
+      }
+      showToast('Coleção Atualizada', 'A coleção do produto foi atualizada com sucesso!');
+      fetchDashboardData();
+    } catch (err) {
+      showToast('Erro ao Atualizar', err.message, true);
+    }
+  };
+
   // View Product Price Chart History Modal
   const handleShowHistory = async (product) => {
     try {
@@ -213,10 +233,36 @@ export default function App() {
     }
   }, [toast.visible]);
 
+  // Extract existing collections dynamically
+  const existingCollections = Array.from(
+    new Set(
+      productsList
+        .map(p => p.collection)
+        .filter(c => c && c.trim() !== '')
+    )
+  ).sort();
+
   // Client-side filtering logic
   const filteredProducts = productsList.filter(prod => {
-    if (activeStoreFilter === 'all') return true;
-    return prod.store.toLowerCase() === activeStoreFilter;
+    // 1. Store filter
+    const storeMatch = activeStoreFilter === 'all' || prod.store.toLowerCase() === activeStoreFilter;
+    if (!storeMatch) return false;
+
+    // 2. Collection filter (custom or dynamic)
+    if (activeCollectionFilter === 'all') return true;
+    
+    if (activeCollectionFilter === 'dynamic_below_target') {
+      return prod.last_price && prod.last_price <= prod.target_price;
+    }
+    if (activeCollectionFilter === 'dynamic_under_2000') {
+      return prod.last_price && prod.last_price <= 2000;
+    }
+    if (activeCollectionFilter === 'dynamic_under_1000') {
+      return prod.last_price && prod.last_price <= 1000;
+    }
+
+    // Default: custom user collection matching
+    return prod.collection === activeCollectionFilter;
   });
 
   return (
@@ -285,6 +331,52 @@ export default function App() {
                     <i className="fa-solid fa-t"></i> Terabyte
                   </button>
                 </div>
+                
+                {/* Coleções & Filtros Dinâmicos */}
+                <div className="collection-filters-container">
+                  <span className="collection-filters-label">
+                    <i className="fa-solid fa-tags"></i> Coleções e Filtros Dinâmicos
+                  </span>
+                  <div className="collection-filters">
+                    <button 
+                      onClick={() => setActiveCollectionFilter('all')} 
+                      className={`collection-filter-btn ${activeCollectionFilter === 'all' ? 'active' : ''}`}
+                    >
+                      Todas as Coleções
+                    </button>
+                    
+                    {/* User-defined collections */}
+                    {existingCollections.map((coll, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveCollectionFilter(coll)}
+                        className={`collection-filter-btn ${activeCollectionFilter === coll ? 'active' : ''}`}
+                      >
+                        <i className="fa-solid fa-folder"></i> {coll}
+                      </button>
+                    ))}
+
+                    {/* Dynamic Virtual Filters */}
+                    <button 
+                      onClick={() => setActiveCollectionFilter('dynamic_below_target')} 
+                      className={`collection-filter-btn dynamic-filter ${activeCollectionFilter === 'dynamic_below_target' ? 'active' : ''}`}
+                    >
+                      🎯 Abaixo da Meta
+                    </button>
+                    <button 
+                      onClick={() => setActiveCollectionFilter('dynamic_under_2000')} 
+                      className={`collection-filter-btn dynamic-filter ${activeCollectionFilter === 'dynamic_under_2000' ? 'active' : ''}`}
+                    >
+                      💰 Abaixo de R$ 2.000
+                    </button>
+                    <button 
+                      onClick={() => setActiveCollectionFilter('dynamic_under_1000')} 
+                      className={`collection-filter-btn dynamic-filter ${activeCollectionFilter === 'dynamic_under_1000' ? 'active' : ''}`}
+                    >
+                      💸 Abaixo de R$ 1.000
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -298,13 +390,14 @@ export default function App() {
                     onDelete={handleDeleteProduct} 
                     onShowHistory={handleShowHistory} 
                     onRename={handleRenameProduct}
+                    onUpdateCollection={handleUpdateCollection}
                   />
                 ))
               ) : (
                 <div className="empty-state">
                   <i className="fa-solid fa-microchip-slash empty-state-icon"></i>
-                  <p>Nenhum produto cadastrado {activeStoreFilter !== 'all' ? 'para esta loja' : ''} ainda.</p>
-                  {activeStoreFilter === 'all' && (
+                  <p>Nenhum produto cadastrado {activeStoreFilter !== 'all' || activeCollectionFilter !== 'all' ? 'para este filtro' : ''} ainda.</p>
+                  {activeStoreFilter === 'all' && activeCollectionFilter === 'all' && (
                     <p className="text-muted">Use o painel lateral para adicionar seu primeiro hardware!</p>
                   )}
                 </div>
@@ -313,7 +406,7 @@ export default function App() {
           </main>
 
           {/* Form lateral card panel */}
-          <AddProductForm onAddProduct={handleAddProduct} />
+          <AddProductForm onAddProduct={handleAddProduct} existingCollections={existingCollections} />
         </div>
       </div>
 

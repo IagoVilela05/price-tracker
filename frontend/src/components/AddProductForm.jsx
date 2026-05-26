@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
-export default function AddProductForm({ onAddProduct }) {
+export default function AddProductForm({ onAddProduct, existingCollections = [] }) {
   const [url, setUrl] = useState('');
   const [targetPrice, setTargetPrice] = useState('');
+  const [collection, setCollection] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -12,13 +13,15 @@ export default function AddProductForm({ onAddProduct }) {
     setLoading(true);
     const success = await onAddProduct({
       url: url.trim(),
-      target_price: parseFloat(targetPrice)
+      target_price: parseFloat(targetPrice),
+      collection: collection.trim() || null
     });
     setLoading(false);
     
     if (success) {
       setUrl('');
       setTargetPrice('');
+      setCollection('');
     }
   };
 
@@ -66,6 +69,28 @@ export default function AddProductForm({ onAddProduct }) {
                 disabled={loading}
                 autoComplete="off"
               />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="product-collection" className="form-label">Coleção / Grupo (Opcional)</label>
+            <div class="input-wrapper">
+              <i className="fa-solid fa-folder input-icon"></i>
+              <input 
+                type="text" 
+                id="product-collection" 
+                placeholder="Ex: Placa de Vídeo" 
+                list="existing-collections"
+                value={collection}
+                onChange={(e) => setCollection(e.target.value)}
+                disabled={loading}
+                autoComplete="off"
+              />
+              <datalist id="existing-collections">
+                {existingCollections.map((coll, idx) => (
+                  <option key={idx} value={coll} />
+                ))}
+              </datalist>
             </div>
           </div>
 

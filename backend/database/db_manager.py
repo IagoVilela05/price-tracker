@@ -47,6 +47,9 @@ def init_db():
     # Roda a migração para adicionar preço parcelado
     migrate_add_price_installments()
 
+    # Roda a migração para adicionar coleções
+    migrate_add_collection()
+
 import re
 
 def clean_product_name(name: str) -> str:
@@ -115,6 +118,20 @@ def migrate_add_price_installments():
     except Exception as e:
         print(f"⚠️ Erro ao rodar migração de preço parcelado: {e}")
 
+def migrate_add_collection():
+    """Verifica e adiciona a coluna collection na tabela products se não existir."""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA table_info(products)")
+            columns = [row["name"] for row in cursor.fetchall()]
+            if "collection" not in columns:
+                cursor.execute("ALTER TABLE products ADD COLUMN collection TEXT")
+                conn.commit()
+                print("✅ Coluna 'collection' adicionada com sucesso no SQLite.")
+    except Exception as e:
+        print(f"⚠️ Erro ao rodar migração de coleções: {e}")
+
 def update_product_name(product_id: int, new_name: str):
     """Atualiza o nome (apelido) de um produto no banco de dados."""
     with get_connection() as conn:
@@ -125,26 +142,48 @@ def update_product_name(product_id: int, new_name: str):
         )
         conn.commit()
 
-def add_product(name: str, store: str, url: str, target_price: float) -> int:
+def update_product_collection(product_id: int, collection: str):
+    """Atualiza a coleção associada a um produto no banco de dados."""
+    val = collection.strip() if collection else None
+    if val == "":
+        val = None
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE products SET collection = ? WHERE id = ?",
+            (val, product_id)
+        )
+        conn.commit()
+
+def add_product(name: str, store: str, url: str, target_price: float, collection: str = None) -> int:
     """Cadastra um novo produto para monitoramento. Retorna o ID do produto criado."""
     # Aplica a limpeza de nome automaticamente antes de cadastrar no banco
     name = clean_product_name(name)
+    coll_val = collection.strip() if collection else None
+    if coll_val == "":
+        coll_val = None
     
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
             cursor.execute(
-                "INSERT INTO products (name, store, url, target_price) VALUES (?, ?, ?, ?)",
-                (name, store.lower(), url, target_price)
+                "INSERT INTO products (name, store, url, target_price, collection) VALUES (?, ?, ?, ?, ?)",
+                (name, store.lower(), url, target_price, coll_val)
             )
             conn.commit()
             return cursor.lastrowid
         except sqlite3.IntegrityError:
-            # Produto já existe pela URL, vamos atualizar o preço alvo e o nome
-            cursor.execute(
-                "UPDATE products SET name = ?, target_price = ? WHERE url = ?",
-                (name, target_price, url)
-            )
+            # Produto já existe pela URL, vamos atualizar o preço alvo, o nome e a coleção (se informada)
+            if coll_val:
+                cursor.execute(
+                    "UPDATE products SET name = ?, target_price = ?, collection = ? WHERE url = ?",
+                    (name, target_price, coll_val, url)
+                )
+            else:
+                cursor.execute(
+                    "UPDATE products SET name = ?, target_price = ? WHERE url = ?",
+                    (name, target_price, url)
+                )
             cursor.execute("SELECT id FROM products WHERE url = ?", (url,))
             row = cursor.fetchone()
             conn.commit()

@@ -225,79 +225,85 @@ def run_price_check(non_interactive: bool = False):
             
             # 1. Caso de Promoção Detectada
             if is_promo:
-                if promo_category == "PRECO_INSANO":
-                    console.print(Panel(
-                        f"🚨 [bold red]SIRENE DE PREÇO INSANO ATIVADA![/bold red] 🚨\n\n"
-                        f"O preço de [bold]{name}[/bold] despencou [bold red]{drop_percentage:.1f}%[/bold red]!\n"
-                        f"Média anterior: [dim]R$ {ref_price:.2f}[/dim] | Preço atual: [bold red]R$ {current_price:.2f}[/bold red] (Possível erro/bug!)",
-                        title="🚨 PREÇO INSANO",
-                        border_style="red"
-                    ))
-                elif promo_category == "SUPER_DESCONTO":
-                    console.print(Panel(
-                        f"💥 [bold orange3]SUPER DESCONTO DETECTADO![/bold orange3] 🔥\n\n"
-                        f"O preço de [bold]{name}[/bold] caiu [bold green]{drop_percentage:.1f}%[/bold green]!\n"
-                        f"Média anterior: [dim]R$ {ref_price:.2f}[/dim] | Preço atual: [bold orange3]R$ {current_price:.2f}[/bold orange3]",
-                        title="💥 Super Oferta",
-                        border_style="orange3"
-                    ))
+                if prior_price is not None and current_price == prior_price:
+                    console.print("[dim]🏷️ Promoção ativa, mas o preço está estável. Ignorando notificação de duplicidade.[/dim]")
                 else:
-                    console.print(Panel(
-                        f"🏷️ [bold yellow]OFERTA INTERESSANTE DETECTADA![/bold yellow]\n\n"
-                        f"O preço de [bold]{name}[/bold] caiu [bold green]{drop_percentage:.1f}%[/bold green]!\n"
-                        f"Média anterior: [dim]R$ {ref_price:.2f}[/dim] | Preço atual: [bold yellow]R$ {current_price:.2f}[/bold yellow]",
-                        title="🏷️ Oferta",
-                        border_style="yellow"
-                    ))
-                
-                if is_new_low:
-                    console.print("[bold yellow]🏆 NOVO MÍNIMO HISTÓRICO REGISTRADO! 🏆[/bold yellow]")
+                    if promo_category == "PRECO_INSANO":
+                        console.print(Panel(
+                            f"🚨 [bold red]SIRENE DE PREÇO INSANO ATIVADA![/bold red] 🚨\n\n"
+                            f"O preço de [bold]{name}[/bold] despencou [bold red]{drop_percentage:.1f}%[/bold red]!\n"
+                            f"Média anterior: [dim]R$ {ref_price:.2f}[/dim] | Preço atual: [bold red]R$ {current_price:.2f}[/bold red] (Possível erro/bug!)",
+                            title="🚨 PREÇO INSANO",
+                            border_style="red"
+                        ))
+                    elif promo_category == "SUPER_DESCONTO":
+                        console.print(Panel(
+                            f"💥 [bold orange3]SUPER DESCONTO DETECTADO![/bold orange3] 🔥\n\n"
+                            f"O preço de [bold]{name}[/bold] caiu [bold green]{drop_percentage:.1f}%[/bold green]!\n"
+                            f"Média anterior: [dim]R$ {ref_price:.2f}[/dim] | Preço atual: [bold orange3]R$ {current_price:.2f}[/bold orange3]",
+                            title="💥 Super Oferta",
+                            border_style="orange3"
+                        ))
+                    else:
+                        console.print(Panel(
+                            f"🏷️ [bold yellow]OFERTA INTERESSANTE DETECTADA![/bold yellow]\n\n"
+                            f"O preço de [bold]{name}[/bold] caiu [bold green]{drop_percentage:.1f}%[/bold green]!\n"
+                            f"Média anterior: [dim]R$ {ref_price:.2f}[/dim] | Preço atual: [bold yellow]R$ {current_price:.2f}[/bold yellow]",
+                            title="🏷️ Oferta",
+                            border_style="yellow"
+                        ))
                     
-                sent = send_telegram_alert(
-                    product_name=name,
-                    store=store,
-                    current_price=current_price,
-                    target_price=target,
-                    url=url,
-                    is_promo=True,
-                    drop_percentage=drop_percentage,
-                    ref_price=ref_price,
-                    is_new_low=is_new_low,
-                    promo_category=promo_category,
-                    price_installments=price_inst
-                )
-                if sent:
-                    console.print("[bold green]📲 Notificação de PROMOÇÃO enviada com sucesso para o Telegram![/bold green]")
-                else:
-                    console.print("[dim yellow]⚠️ Telegram: Notificação não enviada (verifique as credenciais no .env).[/dim yellow]")
+                    if is_new_low:
+                        console.print("[bold yellow]🏆 NOVO MÍNIMO HISTÓRICO REGISTRADO! 🏆[/bold yellow]")
+                        
+                    sent = send_telegram_alert(
+                        product_name=name,
+                        store=store,
+                        current_price=current_price,
+                        target_price=target,
+                        url=url,
+                        is_promo=True,
+                        drop_percentage=drop_percentage,
+                        ref_price=ref_price,
+                        is_new_low=is_new_low,
+                        promo_category=promo_category,
+                        price_installments=price_inst
+                    )
+                    if sent:
+                        console.print("[bold green]📲 Notificação de PROMOÇÃO enviada com sucesso para o Telegram![/bold green]")
+                    else:
+                        console.print("[dim yellow]⚠️ Telegram: Notificação não enviada (verifique as credenciais no .env).[/dim yellow]")
             
             # 2. Caso de Preço Alvo atingido (sem ser promo)
             elif current_price <= target:
-                console.print(Panel(
-                    f"🎉 [bold green]ALERTA DE PREÇO ALVO ATINGIDO![/bold green]\n\n"
-                    f"O produto [bold]{name}[/bold] atingiu o valor alvo de **R$ {target:.2f}**!\n"
-                    f"Preço atual: [bold yellow]R$ {current_price:.2f}[/bold yellow]\n\n"
-                    f"🔗 Compre agora: {url}",
-                    title="🚨 Alerta de Preço Alvo",
-                    border_style="green"
-                ))
-                
-                if is_new_low:
-                    console.print("[bold yellow]🏆 NOVO MÍNIMO HISTÓRICO REGISTRADO! 🏆[/bold yellow]")
-                    
-                sent = send_telegram_alert(
-                    product_name=name,
-                    store=store,
-                    current_price=current_price,
-                    target_price=target,
-                    url=url,
-                    is_new_low=is_new_low,
-                    price_installments=price_inst
-                )
-                if sent:
-                    console.print("[bold green]📲 Notificação de PREÇO ALVO enviada com sucesso para o Telegram![/bold green]")
+                if prior_price is not None and current_price == prior_price:
+                    console.print("[dim]🎯 Preço alvo já atingido e está estável. Ignorando notificação de duplicidade.[/dim]")
                 else:
-                    console.print("[dim yellow]⚠️ Telegram: Notificação não enviada (verifique as credenciais no .env).[/dim yellow]")
+                    console.print(Panel(
+                        f"🎉 [bold green]ALERTA DE PREÇO ALVO ATINGIDO![/bold green]\n\n"
+                        f"O produto [bold]{name}[/bold] atingiu o valor alvo de **R$ {target:.2f}**!\n"
+                        f"Preço atual: [bold yellow]R$ {current_price:.2f}[/bold yellow]\n\n"
+                        f"🔗 Compre agora: {url}",
+                        title="🚨 Alerta de Preço Alvo",
+                        border_style="green"
+                    ))
+                    
+                    if is_new_low:
+                        console.print("[bold yellow]🏆 NOVO MÍNIMO HISTÓRICO REGISTRADO! 🏆[/bold yellow]")
+                        
+                    sent = send_telegram_alert(
+                        product_name=name,
+                        store=store,
+                        current_price=current_price,
+                        target_price=target,
+                        url=url,
+                        is_new_low=is_new_low,
+                        price_installments=price_inst
+                    )
+                    if sent:
+                        console.print("[bold green]📲 Notificação de PREÇO ALVO enviada com sucesso para o Telegram![/bold green]")
+                    else:
+                        console.print("[dim yellow]⚠️ Telegram: Notificação não enviada (verifique as credenciais no .env).[/dim yellow]")
             else:
                 console.print(f"🎯 Alvo: R$ {target:.2f} (Faltam R$ {current_price - target:.2f} para atingir o alvo)")
                 if is_new_low:

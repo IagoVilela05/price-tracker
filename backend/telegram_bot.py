@@ -129,9 +129,11 @@ def handle_list(chat_id: int):
         else:
             price_str = "Sem leituras"
         
+        collection_str = f"\n📁 <b>Coleção:</b> {escape_html(prod['collection'])}" if prod.get('collection') else ""
+        
         message += (
             f"🆔 <b>ID:</b> {prod_id}\n"
-            f"📦 <b>Nome:</b> {escape_html(prod['name'])}\n"
+            f"📦 <b>Nome:</b> {escape_html(prod['name'])}{collection_str}\n"
             f"🏢 <b>Loja:</b> {store}\n"
             f"💰 <b>Preço Atual:</b> <b>{price_str}</b>\n"
             f"🎯 <b>Preço Alvo:</b> R$ {target:.2f}\n"
