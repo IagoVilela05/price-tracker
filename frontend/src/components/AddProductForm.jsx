@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
 
+/**
+ * Componente que renderiza o painel lateral de cadastro de novos links de hardware,
+ * incluindo auto-complete de categorias/coleções sugeridas.
+ * 
+ * @component
+ * @param {Object} props - Propriedades passadas ao componente.
+ * @param {Function} props.onAddProduct - Callback assíncrono para requisição de criação de produto na API.
+ * @param {Array<string>} [props.existingCollections=[]] - Coleções ativas salvas no banco para exibição no auto-complete datalist.
+ * @returns {React.JSX.Element} Formulário de cadastro renderizado.
+ */
 export default function AddProductForm({ onAddProduct, existingCollections = [] }) {
   const [url, setUrl] = useState('');
   const [targetPrice, setTargetPrice] = useState('');

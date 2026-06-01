@@ -67,6 +67,12 @@ class ProductResponse(BaseModel):
     stats: dict = None
 
 def execute_background_price_check():
+    """
+    Executa a verificação e raspagem de preços em segundo plano.
+    
+    @async
+    @returns {None}
+    """
     global IS_SCANNING
     try:
         run_price_check(non_interactive=True)
@@ -75,7 +81,12 @@ def execute_background_price_check():
 
 @app.get("/api/products", response_model=List[ProductResponse])
 def list_products():
-    """Retorna todos os produtos com seu preço atualizado e estatísticas de histórico."""
+    """
+    Retorna todos os produtos com seu preço atualizado e estatísticas de histórico.
+    
+    @async
+    @returns {List[ProductResponse]} Lista consolidada de produtos com preços e estatísticas históricas.
+    """
     products = get_all_products()
     results = []
     
@@ -103,7 +114,12 @@ def list_products():
 
 @app.get("/api/products/check-status")
 def check_immediate_price_sync_status():
-    """Retorna o estado atual da varredura na memória."""
+    """
+    Retorna o estado atual da varredura na memória.
+    
+    @async
+    @returns {dict} Dicionário contendo a flag booleana 'is_scanning'.
+    """
     global IS_SCANNING
     return {"is_scanning": IS_SCANNING}
 

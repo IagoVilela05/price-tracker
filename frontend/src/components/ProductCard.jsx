@@ -28,6 +28,28 @@ const getStoreNameFormatted = (store) => {
   return names[store.toLowerCase()] || store;
 };
 
+/**
+ * Componente que renderiza um cartão de hardware individual contendo as estatísticas, 
+ * badges de loja e coleção, histórico de preço Pix/parcelado e ações dinâmicas.
+ * 
+ * @component
+ * @param {Object} props - Propriedades passadas ao componente.
+ * @param {Object} props.product - Objeto contendo os dados e estatísticas do produto monitorado.
+ * @param {number} props.product.id - Identificador único do produto no banco.
+ * @param {string} props.product.name - Nome/Apelido do produto.
+ * @param {string} props.product.store - Nome da loja parceira.
+ * @param {string} props.product.url - Link do produto monitorado.
+ * @param {number} props.product.target_price - Preço-alvo estipulado pelo usuário.
+ * @param {string|null} props.product.collection - Nome da coleção associada.
+ * @param {number} props.product.last_price - Último preço Pix lido.
+ * @param {number|null} props.product.last_price_installments - Último preço parcelado lido.
+ * @param {Object} props.product.stats - Estatísticas históricas.
+ * @param {Function} props.onDelete - Callback assíncrono para remoção de produto.
+ * @param {Function} props.onShowHistory - Callback para exibição do gráfico de preços.
+ * @param {Function} props.onRename - Callback para atualização de apelido.
+ * @param {Function} props.onUpdateCollection - Callback para edição de grupo/coleção.
+ * @returns {React.JSX.Element} Card renderizado de hardware.
+ */
 export default function ProductCard({ product, onDelete, onShowHistory, onRename, onUpdateCollection }) {
   const isBeaten = product.last_price && product.last_price <= product.target_price;
   
