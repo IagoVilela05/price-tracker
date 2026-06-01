@@ -1,5 +1,4 @@
 import urllib.request
-import urllib.parse
 import json
 from config import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
 

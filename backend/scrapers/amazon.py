@@ -1,3 +1,4 @@
+import re
 from scrapers.base_scraper import BaseScraper
 
 class AmazonScraper(BaseScraper):
@@ -61,7 +62,6 @@ class AmazonScraper(BaseScraper):
         
         # Extração de preço parcelado
         price_installments = 0.0
-        import re
         
         # 1. Tenta buscar em seletores específicos de melhor oferta de parcelamento
         best_offer_selectors = [

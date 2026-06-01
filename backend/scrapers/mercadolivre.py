@@ -1,3 +1,5 @@
+import re
+import json
 from scrapers.base_scraper import BaseScraper
 
 class MercadoLivreScraper(BaseScraper):
@@ -29,7 +31,6 @@ class MercadoLivreScraper(BaseScraper):
 
         # 3. Extração via JSON-LD (Altamente estruturado e comum em páginas de catálogo e normais)
         if not name or price == 0.0:
-            import json
             json_ld_tags = soup.find_all("script", type="application/ld+json")
             for tag in json_ld_tags:
                 if not tag.string:
@@ -78,7 +79,6 @@ class MercadoLivreScraper(BaseScraper):
 
         # Extração de preço parcelado
         price_installments = 0.0
-        import re
         
         # 1. Procurar no container de preço principal do Mercado Livre
         main_price_selectors = [

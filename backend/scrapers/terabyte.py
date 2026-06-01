@@ -1,4 +1,5 @@
 import json
+import re
 from scrapers.base_scraper import BaseScraper
 
 class TerabyteScraper(BaseScraper):
@@ -144,7 +145,6 @@ class TerabyteScraper(BaseScraper):
                 inst_str = inst_el.get_text().strip()
                 if inst_str:
                     # Isola apenas a parte com R$ e números para evitar '10x' etc.
-                    import re
                     match = re.search(r"R\$\s*[\d\.,]+", inst_str)
                     val_str = match.group(0) if match else inst_str
                     val = self.clean_price(val_str)
@@ -154,7 +154,6 @@ class TerabyteScraper(BaseScraper):
                         
         # Se não encontrou por seletores, busca por texto contendo "no cartão" ou similar
         if price_installments <= 0.0:
-            import re
             for el in soup.find_all(["span", "div", "p"]):
                 if self.is_recommendation(el):
                     continue

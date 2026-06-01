@@ -38,7 +38,7 @@ export default function AddProductForm({ onAddProduct, existingCollections = [] 
         <form onSubmit={handleSubmit} className="form-container">
           <div className="form-group">
             <label htmlFor="product-url" className="form-label">URL do Produto</label>
-            <div class="input-wrapper">
+            <div className="input-wrapper">
               <i className="fa-solid fa-link input-icon"></i>
               <input 
                 type="url" 
@@ -55,7 +55,7 @@ export default function AddProductForm({ onAddProduct, existingCollections = [] 
 
           <div className="form-group">
             <label htmlFor="target-price" className="form-label">Preço Alvo (R$)</label>
-            <div class="input-wrapper">
+            <div className="input-wrapper">
               <i className="fa-solid fa-brazilian-real-sign input-icon"></i>
               <input 
                 type="number" 
@@ -74,7 +74,7 @@ export default function AddProductForm({ onAddProduct, existingCollections = [] 
 
           <div className="form-group">
             <label htmlFor="product-collection" className="form-label">Coleção / Grupo (Opcional)</label>
-            <div class="input-wrapper">
+            <div className="input-wrapper">
               <i className="fa-solid fa-folder input-icon"></i>
               <input 
                 type="text" 
@@ -115,9 +115,9 @@ export default function AddProductForm({ onAddProduct, existingCollections = [] 
           <span>Lojas Suportadas:</span>
           <div className="badge-row">
             <span className="store-badge mini amazon"><i className="fa-brands fa-amazon"></i> Amazon</span>
-            <span className="store-badge mini mercadolivre"><i class="fa-solid fa-handshake"></i> M. Livre</span>
+            <span className="store-badge mini mercadolivre"><i className="fa-solid fa-handshake"></i> M. Livre</span>
             <span className="store-badge mini kabum"><i className="fa-solid fa-k"></i> Kabum</span>
-            <span class="store-badge mini pichau"><i className="fa-solid fa-p"></i> Pichau</span>
+            <span className="store-badge mini pichau"><i className="fa-solid fa-p"></i> Pichau</span>
             <span className="store-badge mini terabyte"><i className="fa-solid fa-t"></i> Terabyte</span>
           </div>
         </div>

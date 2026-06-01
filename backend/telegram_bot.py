@@ -3,7 +3,6 @@ import sys
 import time
 import json
 import urllib.request
-import urllib.parse
 from dotenv import load_dotenv
 
 # Garante que o diretório do projeto esteja no PATH do Python

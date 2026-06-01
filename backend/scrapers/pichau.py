@@ -1,4 +1,5 @@
 import json
+import re
 from scrapers.base_scraper import BaseScraper
 
 class PichauScraper(BaseScraper):
@@ -60,7 +61,6 @@ class PichauScraper(BaseScraper):
         pix_price = 0.0
         
         # 1. Procurar elementos com classe contendo "price_vista"
-        import re
         for el in soup.find_all(class_=re.compile(r"price_vista")):
             txt = el.get_text().strip()
             if "R$" in txt:

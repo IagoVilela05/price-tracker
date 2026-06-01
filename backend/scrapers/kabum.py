@@ -1,4 +1,5 @@
 import json
+import re
 from scrapers.base_scraper import BaseScraper
 
 class KabumScraper(BaseScraper):
@@ -91,7 +92,6 @@ class KabumScraper(BaseScraper):
                         
         # 2. Procurar via busca textual robusta (evitando blocos de recomendações)
         if price_installments == 0.0:
-            import re
             for el in soup.find_all(["b", "span", "div", "p"]):
                 if self.is_recommendation(el):
                     continue

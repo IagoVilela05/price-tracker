@@ -5,7 +5,6 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.prompt import Prompt, FloatPrompt
-from rich import print as rprint
 
 from database.db_manager import (
     init_db, add_product, get_all_products, get_product,

@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # pyrefly: ignore [missing-import]
 from fastapi.staticfiles import StaticFiles
 # pyrefly: ignore [missing-import]
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 
 # Adiciona o diretório do projeto ao PATH para importação de módulos locais
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -107,29 +107,32 @@ def check_immediate_price_sync_status():
     global IS_SCANNING
     return {"is_scanning": IS_SCANNING}
 
-@app.get("/api/products/{product_id}", response_model=ProductResponse)
-def get_single_product(product_id: int):
-    """Retorna um produto específico pelo ID."""
-    prod = get_product(product_id)
-    if not prod:
-        raise HTTPException(status_code=404, detail="Produto não encontrado.")
-        
-    last_price = get_last_price(product_id)
-    last_price_installments = get_last_price_installments(product_id)
-    stats = get_price_stats(product_id)
-    
-    return ProductResponse(
-        id=prod["id"],
-        name=prod["name"],
-        store=prod["store"],
-        url=prod["url"],
-        target_price=prod["target_price"],
-        created_at=prod["created_at"],
-        collection=prod.get("collection"),
-        last_price=last_price,
-        last_price_installments=last_price_installments,
-        stats=stats
-    )
+# DEPRECATED/INACTIVE: Esta rota GET individual de produto não é consumida pelo React SPA 
+# nem pelas operações do Bot do Telegram, sendo mantida inativa e documentada para 
+# otimização de segurança e superfície de endpoints.
+# @app.get("/api/products/{product_id}", response_model=ProductResponse)
+# def get_single_product(product_id: int):
+#     """Retorna um produto específico pelo ID."""
+#     prod = get_product(product_id)
+#     if not prod:
+#         raise HTTPException(status_code=404, detail="Produto não encontrado.")
+#         
+#     last_price = get_last_price(product_id)
+#     last_price_installments = get_last_price_installments(product_id)
+#     stats = get_price_stats(product_id)
+#     
+#     return ProductResponse(
+#         id=prod["id"],
+#         name=prod["name"],
+#         store=prod["store"],
+#         url=prod["url"],
+#         target_price=prod["target_price"],
+#         created_at=prod["created_at"],
+#         collection=prod.get("collection"),
+#         last_price=last_price,
+#         last_price_installments=last_price_installments,
+#         stats=stats
+#     )
 
 @app.post("/api/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
 def create_product(payload: ProductCreate):

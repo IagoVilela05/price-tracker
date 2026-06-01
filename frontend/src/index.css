@@ -1187,3 +1187,29 @@ body {
     gap: 4px;
 }
 
+/* Card Header Action Buttons (Refactored from inline JSX to central CSS) */
+.collection-edit-btn,
+.rename-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: var(--transition-smooth);
+}
+
+.collection-edit-btn:hover {
+    color: hsl(263, 90%, 75%);
+    background: rgba(138, 43, 226, 0.05);
+}
+
+.rename-btn:hover {
+    color: var(--accent-cyan);
+    background: rgba(0, 240, 255, 0.05);
+}
+

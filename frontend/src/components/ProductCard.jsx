@@ -71,27 +71,6 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
               }} 
               className="collection-edit-btn"
               title="Editar Coleção"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                fontSize: '12px',
-                padding: '4px 6px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '4px',
-                transition: 'var(--transition-smooth)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'hsl(263, 90%, 75%)';
-                e.currentTarget.style.background = 'rgba(138, 43, 226, 0.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--text-muted)';
-                e.currentTarget.style.background = 'transparent';
-              }}
             >
               <i className="fa-solid fa-folder-open"></i>
             </button>
@@ -105,27 +84,6 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
               }} 
               className="rename-btn"
               title="Editar apelido"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                fontSize: '12px',
-                padding: '4px 6px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '4px',
-                transition: 'var(--transition-smooth)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--accent-cyan)';
-                e.currentTarget.style.background = 'rgba(0, 240, 255, 0.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--text-muted)';
-                e.currentTarget.style.background = 'transparent';
-              }}
             >
               <i className="fa-solid fa-pen"></i>
             </button>
