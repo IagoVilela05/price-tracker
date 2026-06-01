@@ -16,7 +16,7 @@ erDiagram
         integer id PK
         text name
         text store
-        text url UNIQUE
+        text url "UNIQUE"
         real target_price
         text collection
         timestamp created_at
