@@ -22,6 +22,7 @@ DEFAULT_CEP = "35900738"
 # Configurações do Playwright
 PLAYWRIGHT_HEADLESS = True
 PLAYWRIGHT_TIMEOUT = 30000  # 30 segundos
+PLAYWRIGHT_PROXY = os.getenv("PLAYWRIGHT_PROXY")
 
 # Configurações do Telegram
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")

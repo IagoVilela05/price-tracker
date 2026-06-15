@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import re
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
-from config import PLAYWRIGHT_HEADLESS, PLAYWRIGHT_TIMEOUT, DEFAULT_USER_AGENT, DEFAULT_CEP
+from config import PLAYWRIGHT_HEADLESS, PLAYWRIGHT_TIMEOUT, DEFAULT_USER_AGENT, DEFAULT_CEP, PLAYWRIGHT_PROXY
 
 class BaseScraper(ABC):
     def __init__(self, url: str):
@@ -73,10 +73,14 @@ class BaseScraper(ABC):
         """
         with sync_playwright() as p:
             # Desativa o sinalizador de automação para evitar bloqueio por robôs (Amazon/Mercado Livre)
-            browser = p.chromium.launch(
-                headless=PLAYWRIGHT_HEADLESS,
-                args=["--disable-blink-features=AutomationControlled"]
-            )
+            launch_kwargs = {
+                "headless": PLAYWRIGHT_HEADLESS,
+                "args": ["--disable-blink-features=AutomationControlled"]
+            }
+            if PLAYWRIGHT_PROXY:
+                launch_kwargs["proxy"] = {"server": PLAYWRIGHT_PROXY}
+                
+            browser = p.chromium.launch(**launch_kwargs)
             context = browser.new_context(
                 user_agent=DEFAULT_USER_AGENT,
                 viewport={"width": 1280, "height": 720},
