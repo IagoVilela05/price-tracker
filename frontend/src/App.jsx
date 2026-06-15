@@ -4,6 +4,8 @@ import KPIStats from './components/KPIStats';
 import AddProductForm from './components/AddProductForm';
 import ProductCard from './components/ProductCard';
 import HistoryChartModal from './components/HistoryChartModal';
+import BatchImportModal from './components/BatchImportModal';
+import BudgetDrawer from './components/BudgetDrawer';
 
 export default function App() {
   // Global State
@@ -21,6 +23,30 @@ export default function App() {
 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [chartData, setChartData] = useState(null);
+
+  // Batch Import State
+  const [batchModalActive, setBatchModalActive] = useState(false);
+  const [batchItems, setBatchItems] = useState([]);
+  const [batchImporting, setBatchImporting] = useState(false);
+
+  // Budget Simulator State
+  const [budgetItemIds, setBudgetItemIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('price_tracker_budget');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [isBudgetOpen, setIsBudgetOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('price_tracker_budget', JSON.stringify(budgetItemIds));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [budgetItemIds]);
 
   // Toast State
   const [toast, setToast] = useState({
@@ -138,6 +164,76 @@ export default function App() {
     } catch (err) {
       showToast('Erro de Cadastro', err.message, true);
       return false;
+    }
+  };
+
+  // Batch Import
+  const handleBatchImport = async (items) => {
+    const formattedItems = items.map(item => ({
+      ...item,
+      status: 'pending',
+      errorMsg: null
+    }));
+    
+    setBatchItems(formattedItems);
+    setBatchModalActive(true);
+    setBatchImporting(true);
+
+    for (let i = 0; i < formattedItems.length; i++) {
+      setBatchItems(prevItems => {
+        const updated = [...prevItems];
+        updated[i].status = 'processing';
+        return updated;
+      });
+
+      try {
+        const res = await fetch(`${API_URL}/products`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: formattedItems[i].url,
+            target_price: formattedItems[i].target_price,
+            collection: formattedItems[i].collection
+          })
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.detail || 'Erro ao processar URL');
+        }
+
+        setBatchItems(prevItems => {
+          const updated = [...prevItems];
+          updated[i].status = 'success';
+          return updated;
+        });
+      } catch (err) {
+        setBatchItems(prevItems => {
+          const updated = [...prevItems];
+          updated[i].status = 'error';
+          updated[i].errorMsg = err.message || 'Erro de rede ou conexão.';
+          return updated;
+        });
+      }
+    }
+
+    setBatchImporting(false);
+    fetchDashboardData();
+  };
+
+  // Toggle item in budget simulator
+  const handleToggleBudget = (productId) => {
+    setBudgetItemIds(prev => 
+      prev.includes(productId)
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  // Clear all items in budget
+  const handleClearBudget = () => {
+    if (confirm('Deseja realmente limpar todos os componentes do seu orçamento?')) {
+      setBudgetItemIds([]);
     }
   };
 
@@ -391,6 +487,8 @@ export default function App() {
                     onShowHistory={handleShowHistory} 
                     onRename={handleRenameProduct}
                     onUpdateCollection={handleUpdateCollection}
+                    onToggleBudget={handleToggleBudget}
+                    isInBudget={budgetItemIds.includes(prod.id)}
                   />
                 ))
               ) : (
@@ -406,7 +504,11 @@ export default function App() {
           </main>
 
           {/* Form lateral card panel */}
-          <AddProductForm onAddProduct={handleAddProduct} existingCollections={existingCollections} />
+          <AddProductForm 
+            onAddProduct={handleAddProduct} 
+            onBatchImport={handleBatchImport}
+            existingCollections={existingCollections} 
+          />
         </div>
       </div>
 
@@ -419,6 +521,41 @@ export default function App() {
         }} 
         chartData={chartData} 
         product={selectedProduct} 
+      />
+
+      {/* Batch Import Modal */}
+      <BatchImportModal 
+        active={batchModalActive}
+        items={batchItems}
+        importing={batchImporting}
+        onClose={() => {
+          setBatchModalActive(false);
+          setBatchItems([]);
+        }}
+      />
+
+      {/* Floating Budget Trigger Button */}
+      <button 
+        onClick={() => setIsBudgetOpen(true)}
+        className="floating-budget-trigger"
+        title="Abrir Simulador de Orçamento"
+      >
+        <i className="fa-solid fa-calculator"></i>
+        {budgetItemIds.length > 0 && (
+          <span className="floating-budget-badge">
+            {budgetItemIds.length}
+          </span>
+        )}
+      </button>
+
+      {/* Budget Drawer Panel */}
+      <BudgetDrawer 
+        active={isBudgetOpen}
+        onClose={() => setIsBudgetOpen(false)}
+        products={productsList}
+        selectedIds={budgetItemIds}
+        onToggleItem={handleToggleBudget}
+        onClear={handleClearBudget}
       />
 
       {/* Reactive Toast pop-ups */}

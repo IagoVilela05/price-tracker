@@ -4,9 +4,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=iago
+User=root
 WorkingDirectory=/home/iago/Documentos/Pessoal/price-tracker/backend
-ExecStart=/home/iago/Documentos/Pessoal/price-tracker/.venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000
+ExecStart=/home/iago/Documentos/Pessoal/price-tracker/.venv/bin/uvicorn api:app --host 127.0.0.1 --port 80
 Restart=on-failure
 
 [Install]

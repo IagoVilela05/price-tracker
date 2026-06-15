@@ -50,7 +50,7 @@ const getStoreNameFormatted = (store) => {
  * @param {Function} props.onUpdateCollection - Callback para edição de grupo/coleção.
  * @returns {React.JSX.Element} Card renderizado de hardware.
  */
-export default function ProductCard({ product, onDelete, onShowHistory, onRename, onUpdateCollection }) {
+export default function ProductCard({ product, onDelete, onShowHistory, onRename, onUpdateCollection, onToggleBudget, isInBudget }) {
   const isBeaten = product.last_price && product.last_price <= product.target_price;
   
   // Calculate variations
@@ -177,8 +177,16 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
           <button 
             onClick={() => onShowHistory(product)} 
             className="card-btn card-btn-primary"
+            title="Ver histórico de preços"
           >
             <i className="fa-solid fa-chart-line"></i> Histórico
+          </button>
+          <button 
+            onClick={() => onToggleBudget(product.id)}
+            className={`card-btn card-btn-budget ${isInBudget ? 'active' : ''}`}
+            title={isInBudget ? 'Remover do Orçamento' : 'Adicionar ao Orçamento'}
+          >
+            <i className={isInBudget ? 'fa-solid fa-cart-shopping' : 'fa-solid fa-cart-plus'}></i> {isInBudget ? 'No Orçamento' : 'Orçamento'}
           </button>
           <button 
             onClick={() => onDelete(product.id)} 
