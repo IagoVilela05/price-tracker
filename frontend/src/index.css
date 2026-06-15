@@ -1568,6 +1568,11 @@ body {
     box-shadow: 0 0 0 2px var(--accent-cyan-glow);
 }
 
+.budget-select-wrapper select option {
+    background-color: #0d1527; /* Matches var(--bg-main) hsl(224, 47%, 9%) */
+    color: var(--text-primary);
+}
+
 .budget-select-wrapper::after {
     content: '\f107';
     font-family: 'Font Awesome 6 Free';
