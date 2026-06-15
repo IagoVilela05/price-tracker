@@ -4,8 +4,37 @@ from scrapers.base_scraper import BaseScraper
 
 class MercadoLivreScraper(BaseScraper):
     def scrape(self) -> dict:
+        is_already_translated = "translate.google.com" in self.url
         soup = self.get_soup_with_playwright()
+        res = self._extract_from_soup(soup)
         
+        # Detecção de bloqueio/redirecionamento para login
+        is_blocked = (
+            not is_already_translated and (
+                res["price"] == 0.0 or 
+                res["name"] == "Produto Mercado Livre" or 
+                (soup.title and "Mercado Libre" in soup.title.string) or
+                "Para continuar, acesse" in (soup.body.get_text() if soup.body else "")
+            )
+        )
+        
+        if is_blocked:
+            translate_url = f"https://translate.google.com/translate?sl=en&tl=pt&u={self.url}"
+            orig_url = self.url
+            self.url = translate_url
+            try:
+                soup_trans = self.get_soup_with_playwright()
+                res_trans = self._extract_from_soup(soup_trans)
+                if res_trans["price"] > 0.0:
+                    res = res_trans
+            except Exception:
+                pass
+            finally:
+                self.url = orig_url
+                
+        return res
+
+    def _extract_from_soup(self, soup) -> dict:
         # 1. Extração do Nome
         name = None
         name_meta = soup.find("meta", property="og:title")
