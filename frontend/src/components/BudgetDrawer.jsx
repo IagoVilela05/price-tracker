@@ -55,7 +55,7 @@ export default function BudgetDrawer({ active, onClose, products = [], selectedI
   
   // Economia acumulada para os produtos que atingiram a meta (abaixo do preço alvo)
   const savings = selectedProducts.reduce((sum, p) => {
-    if (p.last_price && p.last_price <= p.target_price) {
+    if (p.last_price && p.target_price && p.last_price <= p.target_price) {
       return sum + (p.target_price - p.last_price);
     }
     return sum;

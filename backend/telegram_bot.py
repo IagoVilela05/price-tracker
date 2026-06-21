@@ -112,11 +112,13 @@ def handle_list(chat_id: int):
         target = prod["target_price"]
         store = prod["store"].upper()
         
-        if last_price and last_price <= target:
+        if last_price and target is not None and last_price <= target:
             status_str = "🎯 <b>Preço Alvo Atingido!</b>"
-        elif last_price:
+        elif last_price and target is not None:
             diff = last_price - target
             status_str = f"⏳ Aguardando queda (+R$ {diff:.2f})"
+        elif last_price:
+            status_str = "🔍 Monitorando promoções"
         else:
             status_str = "❓ Sem leituras ainda"
 
@@ -135,7 +137,7 @@ def handle_list(chat_id: int):
             f"📦 <b>Nome:</b> {escape_html(prod['name'])}{collection_str}\n"
             f"🏢 <b>Loja:</b> {store}\n"
             f"💰 <b>Preço Atual:</b> <b>{price_str}</b>\n"
-            f"🎯 <b>Preço Alvo:</b> R$ {target:.2f}\n"
+            f"🎯 <b>Preço Alvo:</b> {f'R$ {target:.2f}' if target is not None else 'Opcional/Sem alvo'}\n"
             f"📊 <b>Status:</b> {status_str}\n"
             f"🔗 <a href=\"{prod['url']}\">Link do Produto</a>\n"
             f"───────────────────\n"
@@ -165,11 +167,13 @@ def handle_check(chat_id: int):
             target = prod["target_price"]
             store = prod["store"].upper()
 
-            if last_price and last_price <= target:
+            if last_price and target is not None and last_price <= target:
                 status = "🎯 <b>ALVO ATINGIDO!</b>"
-            elif last_price:
+            elif last_price and target is not None:
                 diff = last_price - target
                 status = f"⏳ Aguardando queda (+R$ {diff:.2f})"
+            elif last_price:
+                status = "🔍 Monitorando"
             else:
                 status = "❓ Sem leitura"
 
@@ -182,7 +186,7 @@ def handle_check(chat_id: int):
                 price_str = "Sem leitura"
             resumo += (
                 f"📦 <b>{escape_html(prod['name'][:40])}...</b>\n"
-                f"🏢 <b>{store}</b> | 💰 <b>{price_str}</b> (Alvo: R$ {target:.2f})\n"
+                f"🏢 <b>{store}</b> | 💰 <b>{price_str}</b> (Alvo: {f'R$ {target:.2f}' if target is not None else 'Sem alvo'})\n"
                 f"📝 Status: {status}\n\n"
             )
         
@@ -194,27 +198,30 @@ def handle_check(chat_id: int):
 def handle_add(chat_id: int, text: str):
     """Cadastra um novo produto."""
     parts = text.split(maxsplit=2)
-    if len(parts) < 3:
+    if len(parts) < 2:
         send_message(
             chat_id, 
             "⚠️ <b>Formato inválido!</b>\n"
             "Use o comando da seguinte forma:\n"
-            "<code>/add [URL] [PREÇO_ALVO]</code>\n\n"
+            "<code>/add [URL] [PREÇO_ALVO (opcional)]</code>\n\n"
             "<i>Exemplo:</i>\n"
+            "<code>/add https://www.amazon.com.br/dp/B0883N8SDF</code>\n"
             "<code>/add https://www.amazon.com.br/dp/B0883N8SDF 150.00</code>"
         )
         return
 
     url = parts[1].strip()
-    price_str = parts[2].strip().replace(",", ".")
+    target_price = None
 
-    try:
-        target_price = float(price_str)
-        if target_price <= 0:
-            raise ValueError()
-    except ValueError:
-        send_message(chat_id, "⚠️ <b>Preço Alvo inválido!</b> Por favor, digite um número decimal positivo.")
-        return
+    if len(parts) >= 3:
+        price_str = parts[2].strip().replace(",", ".")
+        try:
+            target_price = float(price_str)
+            if target_price <= 0:
+                raise ValueError()
+        except ValueError:
+            send_message(chat_id, "⚠️ <b>Preço Alvo inválido!</b> Por favor, digite um número decimal positivo ou omita-o.")
+            return
 
     send_message(chat_id, "🔄 <b>Conectando à loja e testando o link do produto...</b>\n<i>Isso pode demorar alguns segundos.</i>")
 
@@ -239,7 +246,7 @@ def handle_add(chat_id: int, text: str):
             f"🏢 <b>Loja:</b> {store_name.upper()}\n"
             f"💰 <b>Preço À Vista:</b> R$ {res['price']:.2f}\n"
             f"💳 <b>Preço Parcelado:</b> R$ {price_inst:.2f}\n"
-            f"🎯 <b>Preço Alvo Definido:</b> R$ {target_price:.2f}\n\n"
+            f"🎯 <b>Preço Alvo Definido:</b> {f'R$ {target_price:.2f}' if target_price is not None else 'Opcional/Não definido'}\n\n"
             "📈 O monitoramento contínuo já está ativo para este item!"
         )
         send_message(chat_id, success_msg)

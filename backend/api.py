@@ -45,7 +45,7 @@ IS_SCANNING = False
 
 class ProductCreate(BaseModel):
     url: str
-    target_price: float
+    target_price: float | None = None
     collection: str | None = None
 
 class ProductNameUpdate(BaseModel):
@@ -59,7 +59,7 @@ class ProductResponse(BaseModel):
     name: str
     store: str
     url: str
-    target_price: float
+    target_price: float | None = None
     created_at: str
     collection: str | None = None
     last_price: float = None
@@ -321,7 +321,7 @@ def get_dashboard_kpi_stats():
         target = prod["target_price"]
         stats = get_price_stats(prod_id)
         
-        if last_price and last_price <= target:
+        if last_price and target is not None and last_price <= target:
             below_target += 1
             
         if stats and stats["avg_price"] > 0.0 and last_price:

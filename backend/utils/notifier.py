@@ -12,7 +12,7 @@ def send_telegram_alert(
     product_name: str, 
     store: str, 
     current_price: float, 
-    target_price: float = 0.0, 
+    target_price: float | None = None, 
     url: str = "",
     is_promo: bool = False,
     drop_percentage: float = 0.0,
@@ -71,26 +71,34 @@ def send_telegram_alert(
             message += "\n🏆 <b>Menor preço histórico registrado para este item!</b>\n"
             
         # Alerta se o preço alvo também foi superado durante a promoção
-        if target_price > 0.0 and current_price <= target_price:
+        if target_price is not None and target_price > 0.0 and current_price <= target_price:
             diff = target_price - current_price
             if diff > 0:
                 message += f"\n🎯 <b>Preço Alvo Superado!</b> (Alvo: R$ {target_price:.2f} | Economia extra de <b>R$ {diff:.2f}</b>!)\n"
             else:
                 message += f"\n🎯 <b>Preço Alvo Atingido!</b> (Alvo: R$ {target_price:.2f})\n"
     else:
-        diff = target_price - current_price
-        message = (
-            "🚨 <b>ALERTA DE PREÇO ALVO ATINGIDO!</b> 🚨\n\n"
-            f"O produto <b>{escape_html(product_name)}</b> atingiu o valor desejado!\n\n"
-            f"🏢 <b>Loja</b>: {escape_html(store.upper())}\n"
-            + price_line +
-            f"🎯 <b>Preço Alvo</b>: R$ {target_price:.2f}\n"
-        )
-        
-        if diff > 0:
-            message += f"📉 <b>Economia de</b>: <b>R$ {diff:.2f}</b>!\n"
-        elif diff == 0:
-            message += "🎯 <b>Valor Exato Alvo Atingido!</b>\n"
+        if target_price is None:
+            message = (
+                "🚨 <b>ATUALIZAÇÃO DE PREÇO!</b> 🚨\n\n"
+                f"O produto <b>{escape_html(product_name)}</b> teve uma atualização de valor!\n\n"
+                f"🏢 <b>Loja</b>: {escape_html(store.upper())}\n"
+                + price_line
+            )
+        else:
+            diff = target_price - current_price
+            message = (
+                "🚨 <b>ALERTA DE PREÇO ALVO ATINGIDO!</b> 🚨\n\n"
+                f"O produto <b>{escape_html(product_name)}</b> atingiu o valor desejado!\n\n"
+                f"🏢 <b>Loja</b>: {escape_html(store.upper())}\n"
+                + price_line +
+                f"🎯 <b>Preço Alvo</b>: R$ {target_price:.2f}\n"
+            )
+            
+            if diff > 0:
+                message += f"📉 <b>Economia de</b>: <b>R$ {diff:.2f}</b>!\n"
+            elif diff == 0:
+                message += "🎯 <b>Valor Exato Alvo Atingido!</b>\n"
             
         if is_new_low:
             message += "\n🏆 <b>Menor preço histórico registrado para este item!</b>\n"

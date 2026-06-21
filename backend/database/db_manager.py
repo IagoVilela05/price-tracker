@@ -20,7 +20,7 @@ def init_db():
             name TEXT NOT NULL,
             store TEXT NOT NULL,
             url TEXT UNIQUE NOT NULL,
-            target_price REAL NOT NULL,
+            target_price REAL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)
@@ -49,6 +49,9 @@ def init_db():
 
     # Roda a migração para adicionar coleções
     migrate_add_collection()
+
+    # Roda a migração para tornar o preço alvo opcional
+    migrate_target_price_nullable()
 
 import re
 
@@ -132,6 +135,51 @@ def migrate_add_collection():
     except Exception as e:
         print(f"⚠️ Erro ao rodar migração de coleções: {e}")
 
+def migrate_target_price_nullable():
+    """Migra a coluna target_price para ser NULL (opcional) caso esteja como NOT NULL."""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA table_info(products)")
+            columns = cursor.fetchall()
+            target_price_col = next((col for col in columns if col["name"] == "target_price"), None)
+            
+            # Se a coluna existe e está configurada como NOT NULL (notnull == 1)
+            if target_price_col and target_price_col["notnull"] == 1:
+                print("⏳ Executando migração para tornar 'target_price' opcional (nullable)...")
+                cursor.execute("PRAGMA foreign_keys=OFF;")
+                
+                # Criar nova tabela temporária com target_price REAL (sem NOT NULL)
+                cursor.execute("""
+                CREATE TABLE products_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    store TEXT NOT NULL,
+                    url TEXT UNIQUE NOT NULL,
+                    target_price REAL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    collection TEXT
+                );
+                """)
+                
+                # Copiar dados da antiga para a nova
+                cursor.execute("""
+                INSERT INTO products_new (id, name, store, url, target_price, created_at, collection)
+                SELECT id, name, store, url, target_price, created_at, collection FROM products;
+                """)
+                
+                # Dropar tabela antiga
+                cursor.execute("DROP TABLE products;")
+                
+                # Renomear nova tabela para products
+                cursor.execute("ALTER TABLE products_new RENAME TO products;")
+                
+                cursor.execute("PRAGMA foreign_keys=ON;")
+                conn.commit()
+                print("✅ Migração de 'target_price' nullable concluída com sucesso!")
+    except Exception as e:
+        print(f"⚠️ Erro ao rodar migração para target_price nullable: {e}")
+
 def update_product_name(product_id: int, new_name: str):
     """Atualiza o nome (apelido) de um produto no banco de dados."""
     with get_connection() as conn:
@@ -155,7 +203,7 @@ def update_product_collection(product_id: int, collection: str):
         )
         conn.commit()
 
-def add_product(name: str, store: str, url: str, target_price: float, collection: str = None) -> int:
+def add_product(name: str, store: str, url: str, target_price: float | None = None, collection: str = None) -> int:
     """Cadastra um novo produto para monitoramento. Retorna o ID do produto criado."""
     # Aplica a limpeza de nome automaticamente antes de cadastrar no banco
     name = clean_product_name(name)

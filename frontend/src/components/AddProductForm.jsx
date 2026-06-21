@@ -24,12 +24,12 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!url || !targetPrice) return;
+    if (!url) return;
     
     setLoading(true);
     const success = await onAddProduct({
       url: url.trim(),
-      target_price: parseFloat(targetPrice),
+      target_price: targetPrice ? parseFloat(targetPrice) : null,
       collection: collection.trim() || null
     });
     setLoading(false);
@@ -51,12 +51,12 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
       try {
         const json = JSON.parse(event.target.result);
         if (Array.isArray(json)) {
-          const validItems = json.filter(item => item.url && item.target_price);
+          const validItems = json.filter(item => item.url);
           if (validItems.length > 0) {
             setJsonItems(validItems);
             setBatchText(''); // Clear pasted text if file uploaded
           } else {
-            alert('O arquivo JSON não contém itens válidos com "url" e "target_price".');
+            alert('O arquivo JSON não contém itens válidos com "url".');
             setFileName('');
           }
         } else {
@@ -78,7 +78,7 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
     if (jsonItems && jsonItems.length > 0) {
       itemsToImport = jsonItems.map(item => ({
         url: item.url.trim(),
-        target_price: parseFloat(item.target_price),
+        target_price: item.target_price ? parseFloat(item.target_price) : null,
         collection: item.collection ? item.collection.trim() : (collection.trim() || null)
       }));
     } else if (batchText.trim()) {
@@ -87,11 +87,17 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
         line = line.trim();
         if (!line) continue;
         const parts = line.split(/[\s,;]+/);
-        if (parts.length >= 2) {
+        if (parts.length >= 1) {
           const itemUrl = parts[0].trim();
-          const priceStr = parts[1].trim().replace(',', '.');
-          const price = parseFloat(priceStr);
-          if (itemUrl.startsWith('http') && !isNaN(price)) {
+          let price = null;
+          if (parts.length >= 2) {
+            const priceStr = parts[1].trim().replace(',', '.');
+            const parsedPrice = parseFloat(priceStr);
+            if (!isNaN(parsedPrice)) {
+              price = parsedPrice;
+            }
+          }
+          if (itemUrl.startsWith('http')) {
             itemsToImport.push({
               url: itemUrl,
               target_price: price,
@@ -162,7 +168,7 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
               </div>
 
               <div className="form-group">
-                <label htmlFor="target-price" className="form-label">Preço Alvo (R$)</label>
+                <label htmlFor="target-price" className="form-label">Preço Alvo (R$, Opcional)</label>
                 <div className="input-wrapper">
                   <i className="fa-solid fa-brazilian-real-sign input-icon"></i>
                   <input 
@@ -170,8 +176,7 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
                     id="target-price" 
                     step="0.01" 
                     min="0.01" 
-                    placeholder="Ex: 1200.00" 
-                    required 
+                    placeholder="Ex: 1200.00 (opcional)" 
                     value={targetPrice}
                     onChange={(e) => setTargetPrice(e.target.value)}
                     disabled={loading}
@@ -233,7 +238,7 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
                 <label className="form-label">Colar Links (Um por linha)</label>
                 <div className="textarea-wrapper">
                   <textarea 
-                    placeholder="https://link1.com.br 1200.00&#10;https://link2.com.br 2500.00"
+                    placeholder="https://link1.com.br&#10;https://link2.com.br 2500.00"
                     value={batchText}
                     onChange={(e) => {
                       setBatchText(e.target.value);
@@ -247,7 +252,7 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
                 </div>
                 <div className="batch-instructions">
                   Digite cada produto em uma linha separada:<br/>
-                  <code>[URL] [PREÇO_ALVO]</code>
+                  <code>[URL] [PREÇO_ALVO (opcional)]</code>
                 </div>
               </div>
 

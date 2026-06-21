@@ -50,7 +50,19 @@ def register_product():
         console.print(f"💰 [bold]Preço Atual:[/bold] R$ {res['price']:.2f}")
         
         # Pede o preço alvo
-        target_price = FloatPrompt.ask(f"Defina seu preço alvo em R$ (atual: R$ {res['price']:.2f})")
+        while True:
+            target_price_str = Prompt.ask(f"Defina seu preço alvo em R$ (pressione Enter para ignorar, atual: R$ {res['price']:.2f})", default="")
+            if not target_price_str.strip():
+                target_price = None
+                break
+            try:
+                target_price = float(target_price_str.replace(",", "."))
+                if target_price <= 0:
+                    console.print("[red]❌ Digite um valor maior que zero.[/red]")
+                    continue
+                break
+            except ValueError:
+                console.print("[red]❌ Valor inválido. Digite um número válido.[/red]")
         
         # Registra no banco
         prod_id = add_product(res['name'], scraper_cls.__name__.replace("Scraper", ""), url, target_price)
@@ -90,7 +102,9 @@ def list_products():
         target = prod["target_price"]
         
         status_str = "[red]Acima do Alvo[/red] ❌"
-        if last_price and last_price <= target:
+        if target is None:
+            status_str = "[dim]Monitorando[/dim] 🔍"
+        elif last_price and last_price <= target:
             status_str = "[bold green]ALVO ATINGIDO![/bold green] 🎉"
             
         price_str = f"R$ {last_price:.2f}" if last_price else "Sem leituras"
@@ -100,7 +114,7 @@ def list_products():
             prod["store"].upper(),
             prod["name"],
             price_str,
-            f"R$ {target:.2f}",
+            f"R$ {target:.2f}" if target is not None else "Sem Alvo",
             status_str
         )
         
@@ -274,7 +288,7 @@ def run_price_check(non_interactive: bool = False):
                         console.print("[dim yellow]⚠️ Telegram: Notificação não enviada (verifique as credenciais no .env).[/dim yellow]")
             
             # 2. Caso de Preço Alvo atingido (sem ser promo)
-            elif current_price <= target:
+            elif target is not None and current_price <= target:
                 if prior_price is not None and current_price == prior_price:
                     console.print("[dim]🎯 Preço alvo já atingido e está estável. Ignorando notificação de duplicidade.[/dim]")
                 else:
@@ -304,7 +318,10 @@ def run_price_check(non_interactive: bool = False):
                     else:
                         console.print("[dim yellow]⚠️ Telegram: Notificação não enviada (verifique as credenciais no .env).[/dim yellow]")
             else:
-                console.print(f"🎯 Alvo: R$ {target:.2f} (Faltam R$ {current_price - target:.2f} para atingir o alvo)")
+                if target is not None:
+                    console.print(f"🎯 Alvo: R$ {target:.2f} (Faltam R$ {current_price - target:.2f} para atingir o alvo)")
+                else:
+                    console.print("🎯 Sem preço alvo definido (Apenas monitorando promoções)")
                 if is_new_low:
                     console.print("[bold yellow]🏆 NOVO MÍNIMO HISTÓRICO REGISTRADO! 🏆[/bold yellow]")
                 
@@ -350,11 +367,12 @@ def import_batch_products():
         success_count = 0
         for i, item in enumerate(items, 1):
             url = item.get("url")
-            target_price = item.get("target_price")
-            
-            if not url or target_price is None:
-                console.print(f"[red]⚠️ Item {i} ignorado: URL ou preço alvo ausente.[/red]")
+            if not url:
+                console.print(f"[red]⚠️ Item {i} ignorado: URL ausente.[/red]")
                 continue
+                
+            target_price = item.get("target_price")
+            target_val = float(target_price) if target_price is not None else None
                 
             try:
                 # Resolve scraper
@@ -374,7 +392,7 @@ def import_batch_products():
                     res['name'], 
                     scraper_cls.__name__.replace("Scraper", ""), 
                     url, 
-                    float(target_price)
+                    target_val
                 )
                 price_inst = res.get("price_installments", res['price'])
                 add_price_reading(prod_id, res['price'], price_inst)

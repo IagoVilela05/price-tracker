@@ -348,7 +348,7 @@ export default function App() {
     if (activeCollectionFilter === 'all') return true;
     
     if (activeCollectionFilter === 'dynamic_below_target') {
-      return prod.last_price && prod.last_price <= prod.target_price;
+      return prod.last_price && prod.target_price && prod.last_price <= prod.target_price;
     }
     if (activeCollectionFilter === 'dynamic_under_2000') {
       return prod.last_price && prod.last_price <= 2000;

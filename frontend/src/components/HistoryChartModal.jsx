@@ -109,7 +109,7 @@ export default function HistoryChartModal({ active, onClose, chartData, product 
         pointHoverBorderColor: '#0f172a',
         pointHoverBorderWidth: 3
       },
-      {
+      chartData.target_price && {
         label: 'Preço Alvo',
         data: targetPoints,
         borderColor: '#10b981', // Emerald green
@@ -242,7 +242,9 @@ export default function HistoryChartModal({ active, onClose, chartData, product 
             </div>
             <div className="chart-stat-item">
               <span className="chart-stat-label">Preço Alvo</span>
-              <span className="chart-stat-val text-emerald">{formatBRL(chartData.target_price)}</span>
+              <span className={`chart-stat-val ${chartData.target_price ? 'text-emerald' : 'text-muted'}`}>
+                {chartData.target_price ? formatBRL(chartData.target_price) : 'Opcional'}
+              </span>
             </div>
           </div>
         </div>

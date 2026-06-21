@@ -51,7 +51,7 @@ const getStoreNameFormatted = (store) => {
  * @returns {React.JSX.Element} Card renderizado de hardware.
  */
 export default function ProductCard({ product, onDelete, onShowHistory, onRename, onUpdateCollection, onToggleBudget, isInBudget }) {
-  const isBeaten = product.last_price && product.last_price <= product.target_price;
+  const isBeaten = product.last_price && product.target_price && product.last_price <= product.target_price;
   
   // Calculate variations
   let discountPct = 0;
@@ -148,7 +148,7 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
               </div>
               <div className="target-info">
                 <span className="target-label">Preço Alvo</span>
-                <span className="target-value">{formatBRL(product.target_price)}</span>
+                <span className="target-value">{product.target_price ? formatBRL(product.target_price) : 'Opcional'}</span>
               </div>
             </div>
             <div className="dual-price-installment">
@@ -168,7 +168,7 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
             </div>
             <div className="target-info">
               <span className="target-label">Preço Alvo</span>
-              <span className="target-value">{formatBRL(product.target_price)}</span>
+              <span className="target-value">{product.target_price ? formatBRL(product.target_price) : 'Opcional'}</span>
             </div>
           </div>
         )}

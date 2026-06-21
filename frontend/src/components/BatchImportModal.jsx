@@ -88,7 +88,7 @@ export default function BatchImportModal({ active, items = [], importing, onClos
                     {getFriendlyUrlName(item.url)}
                   </span>
                   <div className="batch-item-meta">
-                    <span>Meta: <strong>R$ {item.target_price.toFixed(2)}</strong></span>
+                    <span>Meta: <strong>{item.target_price ? `R$ ${item.target_price.toFixed(2)}` : 'Opcional'}</strong></span>
                     {item.collection && (
                       <span style={{ marginLeft: '10px' }}>
                         Grupo: <strong>{item.collection}</strong>
