@@ -95,14 +95,14 @@ export default function App() {
   };
 
   const fetchStats = async () => {
-    const res = await fetch(`${API_URL}/stats`);
+    const res = await fetch(`${API_URL}/stats?_t=${Date.now()}`);
     if (!res.ok) throw new Error('Stats API failed');
     const data = await res.json();
     setStats(data);
   };
 
   const fetchProducts = async () => {
-    const res = await fetch(`${API_URL}/products`);
+    const res = await fetch(`${API_URL}/products?_t=${Date.now()}`);
     if (!res.ok) throw new Error('Products API failed');
     const data = await res.json();
     setProductsList(data);
@@ -110,7 +110,7 @@ export default function App() {
 
   const checkSyncStatus = async () => {
     try {
-      const res = await fetch(`${API_URL}/products/check-status`);
+      const res = await fetch(`${API_URL}/products/check-status?_t=${Date.now()}`);
       const data = await res.json();
       if (data.is_scanning) {
         setIsScanning(true);
@@ -144,7 +144,7 @@ export default function App() {
   const pollSyncStatus = () => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${API_URL}/products/check-status`);
+        const res = await fetch(`${API_URL}/products/check-status?_t=${Date.now()}`);
         const data = await res.json();
         
         if (!data.is_scanning) {
@@ -355,7 +355,7 @@ export default function App() {
   // View Product Price Chart History Modal
   const handleShowHistory = async (product) => {
     try {
-      const res = await fetch(`${API_URL}/products/${product.id}/history`);
+      const res = await fetch(`${API_URL}/products/${product.id}/history?_t=${Date.now()}`);
       if (!res.ok) throw new Error('History API failed');
       const data = await res.json();
       

@@ -113,6 +113,7 @@ def list_products():
             target_price=prod["target_price"],
             created_at=prod["created_at"],
             collection=prod.get("collection"),
+            pinned=prod.get("pinned", 0),
             last_price=last_price,
             last_price_installments=last_price_installments,
             stats=stats
@@ -205,6 +206,7 @@ def create_product(payload: ProductCreate):
             target_price=payload.target_price,
             created_at=str(os.environ.get("CURRENT_TIME", "Agora")),
             collection=payload.collection,
+            pinned=0,
             last_price=res["price"],
             last_price_installments=price_inst,
             stats={"avg_price": res["price"], "min_price": res["price"], "count": 1}

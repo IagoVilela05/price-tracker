@@ -21,7 +21,9 @@ def init_db():
             store TEXT NOT NULL,
             url TEXT UNIQUE NOT NULL,
             target_price REAL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            collection TEXT,
+            pinned INTEGER DEFAULT 0
         );
         """)
         
