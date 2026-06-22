@@ -769,9 +769,7 @@ export default function App() {
                       <tr>
                         <th>Produto</th>
                         <th>Preço Atual</th>
-                        <th>Meta Alvo</th>
                         <th>Variação</th>
-                        <th>Histórico (10v)</th>
                         <th style={{ textAlign: 'right' }}>Ações</th>
                       </tr>
                     </thead>

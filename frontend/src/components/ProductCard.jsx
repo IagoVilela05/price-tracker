@@ -116,51 +116,7 @@ export default function ProductCard({
             </div>
           )}
         </td>
-        
-        <td>
-          {product.target_price ? (
-            <span style={{ fontWeight: 600, color: isBeaten ? 'var(--accent-emerald)' : 'var(--text-secondary)' }}>
-              {formatBRL(product.target_price)}
-            </span>
-          ) : (
-            <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>-</span>
-          )}
-          {isBeaten && (
-            <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '3px' }}>
-              <i className="fa-solid fa-circle-check"></i> META ATINGIDA
-            </div>
-          )}
-        </td>
-        
-        <td>
-          <span className={`watchlist-variation ${discountPct > 0 ? 'text-emerald' : 'text-muted'}`}>
-            {discountPct > 0 ? (
-              <>
-                <i className="fa-solid fa-caret-down"></i> -{discountPct}%
-              </>
-            ) : (
-              'Estável'
-            )}
-          </span>
-          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
-            Mín: {formatBRL(product.stats?.min_price || product.last_price)}
-          </div>
-        </td>
-        
-        <td>
-          <div className="watchlist-sparkline-container" title="Tendência de preço (últimas verificações)">
-            <svg className="watchlist-sparkline" width={width} height={height}>
-              <polyline
-                fill="none"
-                stroke={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                points={points}
-              />
-            </svg>
-          </div>
-        </td>
+
         
         <td>
           <div className="watchlist-actions">

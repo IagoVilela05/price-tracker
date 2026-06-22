@@ -259,7 +259,7 @@ export default function HistoryChartModal({ active, onClose, chartData, product 
             <div className="chart-stat-item">
               <span className="chart-stat-label">Preço Alvo</span>
               <span className={`chart-stat-val ${chartData.target_price ? 'text-emerald' : 'text-muted'}`}>
-                {chartData.target_price ? formatBRL(chartData.target_price) : 'Opcional'}
+                {chartData.target_price ? formatBRL(chartData.target_price) : 'N/A'}
               </span>
             </div>
           </div>
