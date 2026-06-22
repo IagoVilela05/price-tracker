@@ -241,6 +241,28 @@ export default function ProductCard({
   }
 
   // viewMode === 'card' (Option A: Minimalist Nordic Card style)
+  const cardWidth = 100;
+  const cardHeight = 35;
+  const cardPadding = 2;
+  
+  const cardPointsList = sparklinePoints.map((val, index) => {
+    const x = cardPadding + (index / (sparklinePoints.length - 1)) * (cardWidth - cardPadding * 2);
+    const y = (cardHeight - cardPadding) - ((val - minVal) / valRange) * (cardHeight - cardPadding * 2);
+    return { x, y };
+  });
+
+  const cardPathD = cardPointsList.length >= 2 
+    ? `M ${cardPointsList.map(p => `${p.x} ${p.y}`).join(' L ')}` 
+    : '';
+
+  const cardFillD = cardPathD 
+    ? `${cardPathD} L ${cardWidth - cardPadding} ${cardHeight} L ${cardPadding} ${cardHeight} Z` 
+    : '';
+
+  const cardLastX = cardPointsList.length > 0 ? cardPointsList[cardPointsList.length - 1].x : 0;
+  const cardLastY = cardPointsList.length > 0 ? cardPointsList[cardPointsList.length - 1].y : 0;
+  const gradId = `sparkline-grad-${product.id}`;
+
   return (
     <div className={`product-card ${isBeaten ? 'target-beaten' : ''}`}>
       <div>
@@ -322,66 +344,94 @@ export default function ProductCard({
         )}
       </div>
 
-      <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px' }}>
-        <div className="watchlist-sparkline-container" title="Tendência" style={{ width: '80px' }}>
-          <svg className="watchlist-sparkline" width="80" height="25">
-            <polyline
-              fill="none"
-              stroke={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              points={points}
-            />
-          </svg>
-        </div>
-        <div className="card-footer" style={{ borderTop: 'none', paddingTop: 0, margin: 0, gap: '6px' }}>
-          <button 
-            onClick={() => onShowHistory(product)} 
-            className="card-btn card-btn-primary"
-            style={{ padding: '6px 10px', fontSize: '11px' }}
-            title="Histórico"
-          >
-            <i className="fa-solid fa-chart-line"></i>
-          </button>
-          <button 
-            onClick={() => {
-              const newTarget = prompt(
-                "Editar preço alvo (R$):", 
-                product.target_price !== null && product.target_price !== undefined ? product.target_price : ""
-              );
-              if (newTarget !== null) {
-                const parsed = newTarget.trim() === "" ? null : parseFloat(newTarget.replace(",", "."));
-                if (newTarget.trim() !== "" && (isNaN(parsed) || parsed <= 0)) {
-                  alert("Por favor, insira um valor numérico válido positivo ou deixe em branco.");
-                  return;
-                }
-                onUpdateTargetPrice(product.id, parsed);
+      {/* Sparkline Grafico no estilo da Opcao A (Quiet Luxury / Area Chart) */}
+      <div className="card-sparkline-container" style={{ marginTop: '20px', marginBottom: '8px' }} title="Tendência de preço (últimas verificações)">
+        <svg viewBox={`0 0 ${cardWidth} ${cardHeight}`} width="100%" height={cardHeight} style={{ overflow: 'visible', display: 'block' }}>
+          <defs>
+            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} stopOpacity="0.15" />
+              <stop offset="100%" stopColor={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+          <path
+            d={cardFillD}
+            fill={`url(#${gradId})`}
+            stroke="none"
+          />
+          <path
+            d={cardPathD}
+            fill="none"
+            stroke={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          {cardPointsList.length > 0 && (
+            <>
+              <circle
+                cx={cardLastX}
+                cy={cardLastY}
+                r="4.5"
+                fill={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
+                opacity="0.3"
+              />
+              <circle
+                cx={cardLastX}
+                cy={cardLastY}
+                r="2"
+                fill={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
+              />
+            </>
+          )}
+        </svg>
+      </div>
+
+      <div className="card-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', marginTop: '12px', display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+        <button 
+          onClick={() => onShowHistory(product)} 
+          className="card-btn card-btn-primary"
+          style={{ padding: '6px 10px', fontSize: '11px' }}
+          title="Histórico"
+        >
+          <i className="fa-solid fa-chart-line"></i>
+        </button>
+        <button 
+          onClick={() => {
+            const newTarget = prompt(
+              "Editar preço alvo (R$):", 
+              product.target_price !== null && product.target_price !== undefined ? product.target_price : ""
+            );
+            if (newTarget !== null) {
+              const parsed = newTarget.trim() === "" ? null : parseFloat(newTarget.replace(",", "."));
+              if (newTarget.trim() !== "" && (isNaN(parsed) || parsed <= 0)) {
+                alert("Por favor, insira um valor numérico válido positivo ou deixe em branco.");
+                return;
               }
-            }}
-            className="card-btn card-btn-primary"
-            style={{ padding: '6px 10px', fontSize: '11px', background: 'var(--bg-main)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}
-            title="Editar preço alvo"
-          >
-            <i className="fa-solid fa-bullseye"></i>
-          </button>
-          <button 
-            onClick={() => onToggleBudget(product.id)}
-            className={`card-btn card-btn-budget ${isInBudget ? 'active' : ''}`}
-            style={{ padding: '6px 10px', fontSize: '11px' }}
-            title="Orçamento"
-          >
-            <i className={isInBudget ? 'fa-solid fa-cart-shopping' : 'fa-solid fa-cart-plus'}></i>
-          </button>
-          <button 
-            onClick={() => onDelete(product.id)} 
-            className="card-btn card-btn-danger"
-            style={{ padding: '6px 10px', fontSize: '11px' }}
-            title="Excluir"
-          >
-            <i className="fa-solid fa-trash-can"></i>
-          </button>
-        </div>
+              onUpdateTargetPrice(product.id, parsed);
+            }
+          }}
+          className="card-btn card-btn-primary"
+          style={{ padding: '6px 10px', fontSize: '11px', background: 'var(--bg-main)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}
+          title="Editar preço alvo"
+        >
+          <i className="fa-solid fa-bullseye"></i>
+        </button>
+        <button 
+          onClick={() => onToggleBudget(product.id)}
+          className={`card-btn card-btn-budget ${isInBudget ? 'active' : ''}`}
+          style={{ padding: '6px 10px', fontSize: '11px' }}
+          title="Orçamento"
+        >
+          <i className={isInBudget ? 'fa-solid fa-cart-shopping' : 'fa-solid fa-cart-plus'}></i>
+        </button>
+        <button 
+          onClick={() => onDelete(product.id)} 
+          className="card-btn card-btn-danger"
+          style={{ padding: '6px 10px', fontSize: '11px' }}
+          title="Excluir"
+        >
+          <i className="fa-solid fa-trash-can"></i>
+        </button>
       </div>
     </div>
   );
