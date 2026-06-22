@@ -291,43 +291,70 @@ export default function ProductCard({
             </span>
           </div>
 
-          {/* SVG chart — preserveAspectRatio="none" forces it to fill full width */}
-          <svg
-            viewBox={`0 0 ${cardWidth} ${cardHeight}`}
-            preserveAspectRatio="none"
-            style={{ flex: 1, height: '52px', display: 'block', overflow: 'visible' }}
-          >
-            <defs>
-              <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} stopOpacity="0.18" />
-                <stop offset="100%" stopColor={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} stopOpacity="0.0" />
-              </linearGradient>
-            </defs>
-            {/* Baseline rule */}
-            <line
-              x1={cardPadding} y1={cardHeight - cardPadding}
-              x2={cardWidth - cardPadding} y2={cardHeight - cardPadding}
-              stroke="var(--border-color)"
-              strokeWidth="0.5"
-              strokeDasharray="2 2"
-            />
-            <path d={cardFillD} fill={`url(#${gradId})`} stroke="none" />
-            <path
-              d={cardPathD}
-              fill="none"
-              stroke={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-            />
+          {/* Wrap SVG + dot in relative container so the HTML dot can be placed precisely */}
+          <div style={{ flex: 1, position: 'relative', height: '52px' }}>
+            <svg
+              viewBox={`0 0 ${cardWidth} ${cardHeight}`}
+              preserveAspectRatio="none"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}
+            >
+              <defs>
+                <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} stopOpacity="0.18" />
+                  <stop offset="100%" stopColor={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} stopOpacity="0.0" />
+                </linearGradient>
+              </defs>
+              {/* Baseline rule */}
+              <line
+                x1={cardPadding} y1={cardHeight - cardPadding}
+                x2={cardWidth - cardPadding} y2={cardHeight - cardPadding}
+                stroke="var(--border-color)"
+                strokeWidth="0.5"
+                strokeDasharray="2 2"
+              />
+              <path d={cardFillD} fill={`url(#${gradId})`} stroke="none" />
+              <path
+                d={cardPathD}
+                fill="none"
+                stroke={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+
+            {/* HTML dot — always a perfect circle because it lives outside the scaled SVG */}
             {cardPointsList.length > 0 && (
               <>
-                <circle cx={cardLastX} cy={cardLastY} r="5" fill={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} opacity="0.2" vectorEffect="non-scaling-stroke" />
-                <circle cx={cardLastX} cy={cardLastY} r="2.5" fill={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} vectorEffect="non-scaling-stroke" />
+                {/* Halo (pulse ring) */}
+                <div style={{
+                  position: 'absolute',
+                  left: `${(cardLastX / cardWidth) * 100}%`,
+                  top: `${(cardLastY / cardHeight) * 100}%`,
+                  transform: 'translate(-50%, -50%)',
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  background: discountPct > 0 ? 'var(--accent-emerald)' : 'var(--accent-primary)',
+                  opacity: 0.2,
+                  pointerEvents: 'none',
+                }} />
+                {/* Solid dot */}
+                <div style={{
+                  position: 'absolute',
+                  left: `${(cardLastX / cardWidth) * 100}%`,
+                  top: `${(cardLastY / cardHeight) * 100}%`,
+                  transform: 'translate(-50%, -50%)',
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: discountPct > 0 ? 'var(--accent-emerald)' : 'var(--accent-primary)',
+                  pointerEvents: 'none',
+                }} />
               </>
             )}
-          </svg>
+          </div>
         </div>
       </div>
 
