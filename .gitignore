@@ -10,6 +10,8 @@ __pycache__/
 # Database
 price_tracker.db
 price_tracker.db-journal
+*.db
+*.db-journal
 
 # Node / React
 frontend/node_modules/

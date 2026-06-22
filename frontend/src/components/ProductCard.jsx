@@ -28,62 +28,141 @@ const getStoreNameFormatted = (store) => {
   return names[store.toLowerCase()] || store;
 };
 
-/**
- * Componente que renderiza um cartão de hardware individual contendo as estatísticas, 
- * badges de loja e coleção, histórico de preço Pix/parcelado e ações dinâmicas.
- * 
- * @component
- * @param {Object} props - Propriedades passadas ao componente.
- * @param {Object} props.product - Objeto contendo os dados e estatísticas do produto monitorado.
- * @param {number} props.product.id - Identificador único do produto no banco.
- * @param {string} props.product.name - Nome/Apelido do produto.
- * @param {string} props.product.store - Nome da loja parceira.
- * @param {string} props.product.url - Link do produto monitorado.
- * @param {number} props.product.target_price - Preço-alvo estipulado pelo usuário.
- * @param {string|null} props.product.collection - Nome da coleção associada.
- * @param {number} props.product.last_price - Último preço Pix lido.
- * @param {number|null} props.product.last_price_installments - Último preço parcelado lido.
- * @param {Object} props.product.stats - Estatísticas históricas.
- * @param {Function} props.onDelete - Callback assíncrono para remoção de produto.
- * @param {Function} props.onShowHistory - Callback para exibição do gráfico de preços.
- * @param {Function} props.onRename - Callback para atualização de apelido.
- * @param {Function} props.onUpdateCollection - Callback para edição de grupo/coleção.
- * @returns {React.JSX.Element} Card renderizado de hardware.
- */
-export default function ProductCard({ product, onDelete, onShowHistory, onRename, onUpdateCollection, onToggleBudget, isInBudget }) {
+export default function ProductCard({ 
+  product, 
+  onDelete, 
+  onShowHistory, 
+  onRename, 
+  onUpdateCollection, 
+  onToggleBudget, 
+  isInBudget,
+  viewMode = 'row'
+}) {
   const isBeaten = product.last_price && product.target_price && product.last_price <= product.target_price;
   
-  // Calculate variations
+  // Calculate variation percentage compared to historical average
   let discountPct = 0;
   if (product.last_price && product.stats?.avg_price && product.last_price < product.stats.avg_price) {
     const diff = ((product.stats.avg_price - product.last_price) / product.stats.avg_price) * 100;
     discountPct = Math.round(diff);
   }
 
-  return (
-    <div className={`product-card ${isBeaten ? 'target-beaten' : ''}`}>
-      <div>
-        <div className="product-card-header-row">
-          <div className="product-badges-col">
-            <a 
-              href={product.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`store-badge ${product.store.toLowerCase()}`} 
-              style={{ marginBottom: 0, textDecoration: 'none', cursor: 'pointer' }}
-              title="Ir para a loja"
-            >
-              {getStoreIcon(product.store)} {getStoreNameFormatted(product.store)}
-              <i className="fa-solid fa-up-right-from-square" style={{ fontSize: '9px', opacity: 0.7, marginLeft: '2px' }}></i>
-            </a>
-            {product.collection && (
-              <span className="product-collection-badge" title="Coleção / Grupo">
-                <i className="fa-solid fa-folder" style={{ marginRight: '4px' }}></i> {product.collection}
-              </span>
-            )}
+  // Calculate sparkline points using SVG
+  const prices = product.stats?.recent_prices || [];
+  // Fallback to two points if no history is present yet
+  const sparklinePoints = prices.length >= 2 ? prices : [product.last_price || 0, product.last_price || 0];
+  
+  const width = 90;
+  const height = 30;
+  const padding = 2;
+  
+  const minVal = Math.min(...sparklinePoints);
+  const maxVal = Math.max(...sparklinePoints);
+  const valRange = maxVal - minVal === 0 ? 1 : maxVal - minVal;
+  
+  const points = sparklinePoints.map((val, index) => {
+    const x = padding + (index / (sparklinePoints.length - 1)) * (width - padding * 2);
+    const y = (height - padding) - ((val - minVal) / valRange) * (height - padding * 2);
+    return `${x},${y}`;
+  }).join(' ');
+
+  if (viewMode === 'row') {
+    return (
+      <tr className={isBeaten ? 'target-beaten' : ''}>
+        <td>
+          <div className="watchlist-product-cell">
+            <div className="watchlist-product-details">
+              <a 
+                href={product.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="watchlist-product-name"
+                title={product.name}
+              >
+                {product.name}
+              </a>
+              <div className="watchlist-product-meta">
+                <span className={`store-badge mini ${product.store.toLowerCase()}`}>
+                  {getStoreIcon(product.store)} {getStoreNameFormatted(product.store)}
+                </span>
+                {product.collection && (
+                  <span className="product-collection-badge" title="Coleção">
+                    <i className="fa-solid fa-folder"></i> {product.collection}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
-          
-          <div className="product-actions-col">
+        </td>
+        
+        <td>
+          <div className="watchlist-price-pix">
+            {formatBRL(product.last_price)}
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500, marginLeft: '4px' }}>Pix</span>
+          </div>
+          {product.last_price_installments && product.last_price_installments > product.last_price && (
+            <div className="watchlist-price-installments" title="Parcelado">
+              <i className="fa-solid fa-credit-card" style={{ fontSize: '9px', marginRight: '3px' }}></i>
+              {formatBRL(product.last_price_installments)}
+            </div>
+          )}
+        </td>
+        
+        <td>
+          {product.target_price ? (
+            <span style={{ fontWeight: 600, color: isBeaten ? 'var(--accent-emerald)' : 'var(--text-secondary)' }}>
+              {formatBRL(product.target_price)}
+            </span>
+          ) : (
+            <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>-</span>
+          )}
+          {isBeaten && (
+            <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <i className="fa-solid fa-circle-check"></i> META ATINGIDA
+            </div>
+          )}
+        </td>
+        
+        <td>
+          <span className={`watchlist-variation ${discountPct > 0 ? 'text-emerald' : 'text-muted'}`}>
+            {discountPct > 0 ? (
+              <>
+                <i className="fa-solid fa-caret-down"></i> -{discountPct}%
+              </>
+            ) : (
+              'Estável'
+            )}
+          </span>
+          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
+            Mín: {formatBRL(product.stats?.min_price || product.last_price)}
+          </div>
+        </td>
+        
+        <td>
+          <div className="watchlist-sparkline-container" title="Tendência de preço (últimas verificações)">
+            <svg className="watchlist-sparkline" width={width} height={height}>
+              <polyline
+                fill="none"
+                stroke={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points={points}
+              />
+            </svg>
+          </div>
+        </td>
+        
+        <td>
+          <div className="watchlist-actions">
+            <button 
+              onClick={() => onShowHistory(product)} 
+              className="watchlist-action-btn"
+              title="Ver histórico de preços"
+            >
+              <i className="fa-solid fa-chart-line"></i>
+            </button>
+            
             <button 
               onClick={() => {
                 const newColl = prompt("Editar coleção do produto (deixe em branco para sem coleção):", product.collection || "");
@@ -91,7 +170,7 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
                    onUpdateCollection(product.id, newColl.trim() || null);
                 }
               }} 
-              className="collection-edit-btn"
+              className="watchlist-action-btn"
               title="Editar Coleção"
             >
               <i className="fa-solid fa-folder-open"></i>
@@ -104,27 +183,55 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
                   onRename(product.id, newName);
                 }
               }} 
-              className="rename-btn"
+              className="watchlist-action-btn"
               title="Editar apelido"
             >
               <i className="fa-solid fa-pen"></i>
             </button>
+            
+            <button 
+              onClick={() => onToggleBudget(product.id)}
+              className={`watchlist-action-btn budget ${isInBudget ? 'active' : ''}`}
+              title={isInBudget ? 'Remover do Orçamento' : 'Adicionar ao Orçamento'}
+            >
+              <i className={isInBudget ? 'fa-solid fa-cart-shopping' : 'fa-solid fa-cart-plus'}></i>
+            </button>
+            
+            <button 
+              onClick={() => onDelete(product.id)} 
+              className="watchlist-action-btn delete" 
+              title="Excluir produto"
+            >
+              <i className="fa-solid fa-trash-can"></i>
+            </button>
           </div>
-        </div>
-        <a 
-          href={product.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="product-name-link"
-          style={{ textDecoration: 'none', color: 'inherit' }}
-          title="Ir para a loja"
-        >
-          <h4 className="product-name" title={product.name}>{product.name}</h4>
-        </a>
-      </div>
-      
+        </td>
+      </tr>
+    );
+  }
+
+  // viewMode === 'card' (Option A: Minimalist Nordic Card style)
+  return (
+    <div className={`product-card ${isBeaten ? 'target-beaten' : ''}`}>
       <div>
-        <div className="card-stats-row">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <span className={`store-badge ${product.store.toLowerCase()}`} style={{ marginBottom: 0 }}>
+            {getStoreIcon(product.store)} {getStoreNameFormatted(product.store)}
+          </span>
+          {product.collection && (
+            <span className="product-collection-badge" style={{ fontSize: '11px' }}>
+              <i className="fa-solid fa-folder"></i> {product.collection}
+            </span>
+          )}
+        </div>
+        
+        <h4 className="product-name" style={{ fontFamily: "'Playfair Display', serif", fontSize: '16px', fontWeight: '700', lineHeight: '1.4' }}>
+          <a href={product.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+            {product.name}
+          </a>
+        </h4>
+
+        <div className="card-stats-row" style={{ marginTop: '12px', background: 'var(--bg-main)', border: '1px solid var(--border-color)' }}>
           <div className="card-stat">
             <span className="card-stat-label">Min Histórico</span>
             <span className="card-stat-val text-emerald">
@@ -132,7 +239,7 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
             </span>
           </div>
           <div className="card-stat right">
-            <span className="card-stat-label">Variação Média</span>
+            <span className="card-stat-label">Variação</span>
             <span className={`card-stat-val ${discountPct > 0 ? 'text-emerald' : 'text-muted'}`}>
               {discountPct > 0 ? `-${discountPct}%` : 'Estável'}
             </span>
@@ -140,18 +247,20 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
         </div>
 
         {product.last_price_installments && product.last_price_installments > product.last_price ? (
-          <div className="price-details dual-price">
+          <div className="price-details dual-price" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', marginTop: '12px' }}>
             <div className="dual-price-main">
               <div className="price-info">
-                <span className="price-label">⚡ À Vista (Pix)</span>
-                <span className="price-value">{formatBRL(product.last_price)}</span>
+                <span className="price-label">⚡ À Vista</span>
+                <span className="price-value" style={{ fontSize: '18px' }}>{formatBRL(product.last_price)}</span>
               </div>
-              <div className="target-info">
-                <span className="target-label">Preço Alvo</span>
-                <span className="target-value">{product.target_price ? formatBRL(product.target_price) : 'Opcional'}</span>
-              </div>
+              {product.target_price && (
+                <div className="target-info">
+                  <span className="target-label">Preço Alvo</span>
+                  <span className="target-value">{formatBRL(product.target_price)}</span>
+                </div>
+              )}
             </div>
-            <div className="dual-price-installment">
+            <div className="dual-price-installment" style={{ borderTop: '1px dashed var(--border-color)' }}>
               <span className="price-label">
                 <i className="fa-solid fa-credit-card"></i> Parcelado
               </span>
@@ -161,37 +270,56 @@ export default function ProductCard({ product, onDelete, onShowHistory, onRename
             </div>
           </div>
         ) : (
-          <div className="price-details">
+          <div className="price-details" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', marginTop: '12px' }}>
             <div className="price-info">
               <span className="price-label">Preço Atual</span>
-              <span className="price-value">{formatBRL(product.last_price)}</span>
+              <span className="price-value" style={{ fontSize: '18px' }}>{formatBRL(product.last_price)}</span>
             </div>
-            <div className="target-info">
-              <span className="target-label">Preço Alvo</span>
-              <span className="target-value">{product.target_price ? formatBRL(product.target_price) : 'Opcional'}</span>
-            </div>
+            {product.target_price && (
+              <div className="target-info">
+                <span className="target-label">Preço Alvo</span>
+                <span className="target-value">{formatBRL(product.target_price)}</span>
+              </div>
+            )}
           </div>
         )}
+      </div>
 
-        <div className="card-footer">
+      <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px' }}>
+        <div className="watchlist-sparkline-container" title="Tendência" style={{ width: '80px' }}>
+          <svg className="watchlist-sparkline" width="80" height="25">
+            <polyline
+              fill="none"
+              stroke={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              points={points}
+            />
+          </svg>
+        </div>
+        <div className="card-footer" style={{ borderTop: 'none', paddingTop: 0, margin: 0, gap: '6px' }}>
           <button 
             onClick={() => onShowHistory(product)} 
             className="card-btn card-btn-primary"
-            title="Ver histórico de preços"
+            style={{ padding: '6px 10px', fontSize: '11px' }}
+            title="Histórico"
           >
-            <i className="fa-solid fa-chart-line"></i> Histórico
+            <i className="fa-solid fa-chart-line"></i>
           </button>
           <button 
             onClick={() => onToggleBudget(product.id)}
             className={`card-btn card-btn-budget ${isInBudget ? 'active' : ''}`}
-            title={isInBudget ? 'Remover do Orçamento' : 'Adicionar ao Orçamento'}
+            style={{ padding: '6px 10px', fontSize: '11px' }}
+            title="Orçamento"
           >
-            <i className={isInBudget ? 'fa-solid fa-cart-shopping' : 'fa-solid fa-cart-plus'}></i> {isInBudget ? 'No Orçamento' : 'Orçamento'}
+            <i className={isInBudget ? 'fa-solid fa-cart-shopping' : 'fa-solid fa-cart-plus'}></i>
           </button>
           <button 
             onClick={() => onDelete(product.id)} 
-            className="card-btn card-btn-danger" 
-            title="Excluir produto"
+            className="card-btn card-btn-danger"
+            style={{ padding: '6px 10px', fontSize: '11px' }}
+            title="Excluir"
           >
             <i className="fa-solid fa-trash-can"></i>
           </button>

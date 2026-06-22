@@ -1,39 +1,39 @@
 /* React App - Premium Design System based on HSL Color Tokens */
 :root {
-    --bg-main: hsl(224, 47%, 9%);
-    --bg-card: hsla(223, 47%, 14%, 0.7);
-    --bg-card-hover: hsla(223, 47%, 18%, 0.8);
-    --bg-header: hsla(224, 47%, 7%, 0.85);
+    --bg-main: hsl(35, 25%, 94%); /* Warm cream/sand */
+    --bg-card: hsl(0, 0%, 100%); /* Pure white */
+    --bg-card-hover: hsl(35, 15%, 98%); /* Soft warm light gray */
+    --bg-header: hsl(0, 0%, 100%); /* Pure white header */
     
-    --text-primary: hsl(210, 40%, 98%);
-    --text-secondary: hsl(215, 20%, 75%);
-    --text-muted: hsl(215, 16%, 50%);
+    --text-primary: hsl(220, 20%, 15%); /* Deep charcoal */
+    --text-secondary: hsl(220, 10%, 40%); /* Warm gray */
+    --text-muted: hsl(220, 10%, 55%); /* Muted gray */
     
-    --accent-primary: hsl(263, 90%, 65%);
-    --accent-primary-glow: hsla(263, 90%, 65%, 0.15);
-    --accent-cyan: hsl(190, 100%, 50%);
-    --accent-cyan-glow: hsla(190, 100%, 50%, 0.15);
-    --accent-emerald: hsl(145, 80%, 48%);
-    --accent-emerald-glow: hsla(145, 80%, 48%, 0.15);
-    --accent-danger: hsl(350, 80%, 55%);
-    --accent-danger-glow: hsla(350, 80%, 55%, 0.15);
+    --accent-primary: hsl(20, 60%, 52%); /* Terracota */
+    --accent-primary-glow: hsla(20, 60%, 52%, 0.1);
+    --accent-cyan: hsl(200, 60%, 45%); /* Soft steel blue */
+    --accent-cyan-glow: hsla(200, 60%, 45%, 0.1);
+    --accent-emerald: hsl(135, 25%, 42%); /* Muted Sage green */
+    --accent-emerald-glow: hsla(135, 25%, 42%, 0.1);
+    --accent-danger: hsl(5, 60%, 52%); /* Brick red */
+    --accent-danger-glow: hsla(5, 60%, 52%, 0.1);
     
-    --border-color: hsla(217, 30%, 30%, 0.3);
-    --border-glow: hsla(263, 90%, 65%, 0.3);
-    --border-glow-cyan: hsla(190, 100%, 50%, 0.3);
+    --border-color: hsl(35, 10%, 86%); /* Soft stone border */
+    --border-glow: hsla(20, 60%, 52%, 0.2);
+    --border-glow-cyan: hsla(200, 60%, 45%, 0.2);
     
-    --glass-blur: blur(16px);
-    --radius-sm: 8px;
-    --radius-md: 14px;
-    --radius-lg: 20px;
-    --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --glass-blur: none;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --transition-smooth: all 0.2s ease-in-out;
     
-    /* Store Colors */
-    --store-amazon: hsl(36, 100%, 50%);
-    --store-mercadolivre: hsl(48, 100%, 50%);
-    --store-kabum: hsl(208, 100%, 50%);
-    --store-pichau: hsl(354, 90%, 50%);
-    --store-terabyte: hsl(142, 70%, 45%);
+    /* Store Colors - Muted organic version for light mode */
+    --store-amazon: hsl(36, 85%, 42%);
+    --store-mercadolivre: hsl(45, 80%, 38%);
+    --store-kabum: hsl(208, 75%, 42%);
+    --store-pichau: hsl(354, 75%, 42%);
+    --store-terabyte: hsl(142, 50%, 36%);
 }
 
 * {
@@ -1730,3 +1730,317 @@ body {
     border-color: var(--accent-danger);
     color: var(--accent-danger);
 }
+
+/* Sidebar Navigation Tabs */
+.app-nav {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.nav-btn {
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    background: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.nav-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-card-hover);
+}
+.nav-btn.active {
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+/* Watchlist Table Feed Layout */
+.watchlist-table-container {
+    width: 100%;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    overflow-x: auto;
+    margin-top: 20px;
+}
+.watchlist-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+.watchlist-table th {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.75px;
+    color: var(--text-secondary);
+    background: var(--bg-card-hover);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+.watchlist-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+.watchlist-table tr:last-child td {
+    border-bottom: none;
+}
+.watchlist-table tr:hover td {
+    background: var(--bg-card-hover);
+}
+
+.watchlist-product-cell {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.watchlist-product-details {
+    overflow: hidden;
+}
+.watchlist-product-name {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 320px;
+    display: block;
+}
+.watchlist-product-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    display: flex;
+    gap: 10px;
+}
+
+.watchlist-price-pix {
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.watchlist-price-installments {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.watchlist-variation {
+    font-weight: 700;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.watchlist-sparkline-container {
+    width: 90px;
+}
+.watchlist-sparkline {
+    width: 90px;
+    height: 30px;
+    display: block;
+}
+
+.watchlist-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+}
+.watchlist-action-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: var(--transition-smooth);
+}
+.watchlist-action-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+    background: var(--bg-card-hover);
+    transform: translateY(-1px);
+}
+.watchlist-action-btn.delete:hover {
+    color: var(--accent-danger);
+    border-color: var(--accent-danger);
+    background: var(--accent-danger-glow);
+}
+.watchlist-action-btn.budget.active {
+    color: var(--accent-emerald);
+    border-color: var(--accent-emerald);
+    background: var(--accent-emerald-glow);
+}
+
+/* Sidebar Add Product Drawer */
+.add-product-drawer-container {
+    position: fixed;
+    top: 0;
+    right: -450px;
+    width: 450px;
+    height: 100vh;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border-color);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: right var(--transition-smooth);
+}
+.add-product-drawer-container.active {
+    right: 0;
+}
+.add-product-drawer-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 34, 41, 0.25);
+    backdrop-filter: blur(2px);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-smooth);
+}
+.add-product-drawer-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Override glowing background for Nordic style */
+.glow-bg {
+    display: none;
+}
+
+/* Typography styles for brand */
+.app-title {
+    font-family: 'Playfair Display', serif !important;
+    font-weight: 800;
+}
+
+/* Modal styling adjustments for light theme */
+.modal-backdrop {
+    background: rgba(30, 34, 41, 0.4) !important;
+    backdrop-filter: blur(3px) !important;
+}
+.modal-content {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1) !important;
+    color: var(--text-primary) !important;
+}
+.modal-title {
+    color: var(--text-primary) !important;
+}
+.modal-close {
+    color: var(--text-secondary) !important;
+}
+.modal-close:hover {
+    color: var(--accent-danger) !important;
+}
+
+/* Budget Drawer adjustments */
+.budget-drawer-backdrop {
+    background: rgba(30, 34, 41, 0.25) !important;
+    backdrop-filter: blur(2px) !important;
+}
+.budget-drawer-container {
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.05) !important;
+}
+.budget-drawer-footer {
+    background: var(--bg-card-hover) !important;
+}
+.budget-summary-row.accent .budget-summary-val {
+    color: var(--text-primary) !important;
+}
+
+/* Remove glow elements and borders */
+.stat-card:hover {
+    border-color: var(--border-color) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05) !important;
+}
+.panel-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02) !important;
+}
+.btn-primary {
+    background: var(--text-primary) !important;
+    color: var(--bg-card) !important;
+    box-shadow: none !important;
+}
+.btn-primary:hover {
+    background: var(--text-secondary) !important;
+    box-shadow: none !important;
+    transform: translateY(-1px) !important;
+}
+.logo-icon-wrapper {
+    background: var(--text-primary) !important;
+    box-shadow: none !important;
+}
+
+/* Minimalist Nordic Card (Option A) Overrides */
+.product-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01) !important;
+    border-radius: var(--radius-md) !important;
+    transition: var(--transition-smooth) !important;
+}
+
+.product-card:hover {
+    transform: translateY(-2px) !important;
+    border-color: var(--text-secondary) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03) !important;
+}
+
+.product-card.target-beaten {
+    border-color: var(--accent-emerald) !important;
+    box-shadow: 0 0 10px rgba(86, 124, 93, 0.05) !important;
+}
+
+.product-card.target-beaten::before {
+    display: none !important; /* Remove bright badge in Nordic style */
+}
+
+/* Microchip Icon color inside the logo */
+.logo-icon {
+    color: var(--accent-primary) !important;
+}
+
+/* Dashboard Two-Column Grid Layout */
+.dashboard-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 30px;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-grid-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+

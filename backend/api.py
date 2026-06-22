@@ -17,7 +17,7 @@ from database.db_manager import (
     init_db, add_product, get_all_products, get_product,
     delete_product, add_price_reading, get_last_price, get_price_history,
     get_price_stats, update_product_name, get_last_price_installments,
-    update_product_collection
+    update_product_collection, get_latest_scan_time
 )
 from scrapers import get_scraper_class_for_url
 from main import run_price_check
@@ -262,25 +262,15 @@ def get_product_price_chart_history(product_id: int):
     # Inverte para ordem cronológica crescente (antigo -> recente)
     history.reverse()
     
-    # Formata campos de data simplificados para o eixo X do gráfico
     formatted_history = []
     for h in history:
-        #checked_at: 2026-05-21 13:15:00
         raw_date = h["checked_at"]
-        # Extrai apenas a hora ou o dia/mês
-        short_date = raw_date
-        if len(raw_date) >= 16:
-            # Pega ex: "21/05 13:15"
-            try:
-                date_part = raw_date.split(" ")[0].split("-")
-                time_part = raw_date.split(" ")[1][:5]
-                short_date = f"{date_part[2]}/{date_part[1]} {time_part}"
-            except Exception:
-                pass
-                
+        # Converte para formato ISO-8601 UTC
+        iso_date = raw_date.replace(" ", "T") + "Z" if raw_date and " " in raw_date else raw_date
+        
         formatted_history.append({
-            "checked_at": h["checked_at"],
-            "formatted_date": short_date,
+            "checked_at": iso_date,
+            "formatted_date": iso_date,
             "price": h["price"],
             "price_installments": h.get("price_installments", h["price"])
         })
@@ -309,7 +299,9 @@ def trigger_immediate_price_sync(background_tasks: BackgroundTasks):
 
 @app.get("/api/stats")
 def get_dashboard_kpi_stats():
-    """Retorna métricas gerais consolidadas para os cards do dashboard front-end."""
+    """Retorna métricas gerais consolidadas para os cards do dashboard front-end, incluindo horário de varreduras."""
+    import datetime
+    
     products = get_all_products()
     total = len(products)
     below_target = 0
@@ -330,11 +322,26 @@ def get_dashboard_kpi_stats():
                 if diff_pct > max_discount_pct:
                     max_discount_pct = diff_pct
                     
+    last_scan = get_latest_scan_time()
+    next_scan = None
+    
+    if last_scan:
+        try:
+            dt = datetime.datetime.strptime(last_scan, "%Y-%m-%dT%H:%M:%SZ")
+            check_interval = int(os.getenv("CHECK_INTERVAL_SECONDS", 14400))
+            dt_next = dt + datetime.timedelta(seconds=check_interval)
+            next_scan = dt_next.strftime("%Y-%m-%dT%H:%M:%SZ")
+        except Exception as e:
+            print("Erro ao calcular próxima verificação:", e)
+            
     return {
         "total_products": total,
         "below_target": below_target,
-        "max_discount_pct": round(max_discount_pct, 1)
+        "max_discount_pct": round(max_discount_pct, 1),
+        "last_scan_time": last_scan,
+        "next_scan_time": next_scan
     }
+
 
 # Monta a pasta de arquivos estáticos para servir o front-end compilado do React (SPA)
 dist_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend/dist")

@@ -52,10 +52,26 @@ const getStoreNameFormatted = (store) => {
   return names[store.toLowerCase()] || store;
 };
 
+const formatChartDate = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    // Se a data vier no formato ISO UTC (com T e Z), new Date() a converterá para local
+    const dateObj = new Date(dateStr);
+    if (isNaN(dateObj.getTime())) return dateStr;
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const hours = String(dateObj.getHours()).padStart(2, '0');
+    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+    return `${day}/${month} ${hours}:${minutes}`;
+  } catch (e) {
+    return dateStr;
+  }
+};
+
 export default function HistoryChartModal({ active, onClose, chartData, product }) {
   if (!active || !chartData || !product) return null;
 
-  const labels = chartData.history.map(h => h.formatted_date);
+  const labels = chartData.history.map(h => formatChartDate(h.formatted_date));
   const pricePoints = chartData.history.map(h => h.price);
   const priceInstallmentPoints = chartData.history.map(h => h.price_installments || h.price);
   const targetPoints = Array(labels.length).fill(chartData.target_price);

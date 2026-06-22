@@ -272,19 +272,19 @@ def add_price_reading(product_id: int, price: float, price_installments: float =
         conn.commit()
 
 def get_price_history(product_id: int, limit: int = 30):
-    """Retorna o histórico de preços de um produto com data convertida para o horário local do sistema."""
+    """Retorna o histórico de preços de um produto com a data/hora UTC original."""
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
             cursor.execute(
-                "SELECT id, product_id, price, price_installments, datetime(checked_at, 'localtime') AS checked_at FROM price_history WHERE product_id = ? ORDER BY checked_at DESC LIMIT ?",
+                "SELECT id, product_id, price, price_installments, checked_at FROM price_history WHERE product_id = ? ORDER BY checked_at DESC LIMIT ?",
                 (product_id, limit)
             )
             return [dict(row) for row in cursor.fetchall()]
         except sqlite3.OperationalError:
             # Fallback se a coluna price_installments não existir
             cursor.execute(
-                "SELECT id, product_id, price, datetime(checked_at, 'localtime') AS checked_at FROM price_history WHERE product_id = ? ORDER BY checked_at DESC LIMIT ?",
+                "SELECT id, product_id, price, checked_at FROM price_history WHERE product_id = ? ORDER BY checked_at DESC LIMIT ?",
                 (product_id, limit)
             )
             res = []
@@ -329,7 +329,7 @@ def get_last_price_installments(product_id: int) -> float:
             return row["price"] if row else None
 
 def get_price_stats(product_id: int) -> dict:
-    """Retorna estatísticas históricas de preço (média, mínimo, total de leituras)."""
+    """Retorna estatísticas históricas de preço (média, mínimo, total de leituras, e histórico recente para sparkline)."""
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
@@ -338,10 +338,34 @@ def get_price_stats(product_id: int) -> dict:
             (product_id,)
         )
         row = cursor.fetchone()
+        
+        cursor.execute(
+            "SELECT price FROM price_history WHERE product_id = ? ORDER BY checked_at DESC LIMIT 10",
+            (product_id,)
+        )
+        recent_rows = cursor.fetchall()
+        recent_prices = [r["price"] for r in recent_rows]
+        recent_prices.reverse() # Cronológica: mais antiga para mais recente
+        
         if row and row["count"] > 0:
             return {
                 "avg_price": row["avg_price"],
                 "min_price": row["min_price"],
-                "count": row["count"]
+                "count": row["count"],
+                "recent_prices": recent_prices
             }
-        return {"avg_price": 0.0, "min_price": 0.0, "count": 0}
+        return {"avg_price": 0.0, "min_price": 0.0, "count": 0, "recent_prices": []}
+
+def get_latest_scan_time() -> str | None:
+    """Retorna a data/hora UTC da última verificação de preços registrada no histórico."""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT MAX(checked_at) as last_scan FROM price_history")
+        row = cursor.fetchone()
+        if row and row["last_scan"]:
+            # O formato padrão de timestamp do SQLite é "YYYY-MM-DD HH:MM:SS" (em UTC)
+            utc_str = row["last_scan"]
+            return utc_str.replace(" ", "T") + "Z"
+        return None
+
+
