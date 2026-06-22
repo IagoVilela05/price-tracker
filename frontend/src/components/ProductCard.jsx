@@ -345,8 +345,8 @@ export default function ProductCard({
       </div>
 
       {/* Sparkline Grafico no estilo da Opcao A (Quiet Luxury / Area Chart) */}
-      <div className="card-sparkline-container" style={{ marginTop: '20px', marginBottom: '8px' }} title="Tendência de preço (últimas verificações)">
-        <svg viewBox={`0 0 ${cardWidth} ${cardHeight}`} width="100%" height={cardHeight} style={{ overflow: 'visible', display: 'block' }}>
+      <div className="card-sparkline-container" style={{ width: '100%', marginTop: '20px', marginBottom: '8px' }} title="Tendência de preço (últimas verificações)">
+        <svg viewBox={`0 0 ${cardWidth} ${cardHeight}`} style={{ width: '100%', height: '40px', overflow: 'visible', display: 'block' }}>
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} stopOpacity="0.15" />
