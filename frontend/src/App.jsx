@@ -333,6 +333,25 @@ export default function App() {
     }
   };
 
+  // Toggle Product Pinned/Favorite Status
+  const handleTogglePin = async (id, pinned) => {
+    try {
+      const res = await fetch(`${API_URL}/products/${id}/pinned`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pinned: pinned })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Erro ao favoritar produto');
+      }
+      showToast(pinned ? 'Adicionado aos Favoritos' : 'Removido dos Favoritos', pinned ? 'Produto fixado no Dashboard.' : 'Produto removido do Dashboard.');
+      fetchDashboardData();
+    } catch (err) {
+      showToast('Erro ao favoritar', err.message, true);
+    }
+  };
+
   // View Product Price Chart History Modal
   const handleShowHistory = async (product) => {
     try {
@@ -411,9 +430,9 @@ export default function App() {
     .filter(prod => prod.discountPct > 0)
     .sort((a, b) => b.discountPct - a.discountPct);
 
-  // Filter products below their target price for the "Abaixo da Meta" section
-  const productsBelowTarget = productsList.filter(
-    prod => prod.last_price && prod.target_price && prod.last_price <= prod.target_price
+  // Filter pinned/favorite products for the "Favoritos" section
+  const pinnedProducts = productsList.filter(
+    prod => !!prod.pinned
   );
 
   const formatBRL = (val) => {
@@ -493,6 +512,7 @@ export default function App() {
                         onRename={handleRenameProduct}
                         onUpdateCollection={handleUpdateCollection}
                         onUpdateTargetPrice={handleUpdateTargetPrice}
+                        onTogglePin={handleTogglePin}
                         onToggleBudget={handleToggleBudget}
                         isInBudget={budgetItemIds.includes(prod.id)}
                       />
@@ -503,14 +523,14 @@ export default function App() {
                 )}
               </div>
 
-              {/* Box 2: Abaixo da Meta */}
+              {/* Box 2: Produtos Favoritos */}
               <div className="dashboard-section">
                 <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '22px', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                  <i className="fa-solid fa-circle-check" style={{ color: 'var(--accent-emerald)' }}></i> Abaixo da Meta
+                  <i className="fa-solid fa-star" style={{ color: 'var(--accent-primary)' }}></i> Produtos Favoritos
                 </h3>
-                {productsBelowTarget.length > 0 ? (
+                {pinnedProducts.length > 0 ? (
                   <div className="product-grid">
-                    {productsBelowTarget.slice(0, 4).map(prod => (
+                    {pinnedProducts.map(prod => (
                       <ProductCard 
                         key={prod.id} 
                         product={prod} 
@@ -520,13 +540,14 @@ export default function App() {
                         onRename={handleRenameProduct}
                         onUpdateCollection={handleUpdateCollection}
                         onUpdateTargetPrice={handleUpdateTargetPrice}
+                        onTogglePin={handleTogglePin}
                         onToggleBudget={handleToggleBudget}
                         isInBudget={budgetItemIds.includes(prod.id)}
                       />
                     ))}
                   </div>
                 ) : (
-                  <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Nenhum produto abaixo do preço-alvo no momento.</p>
+                  <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Nenhum produto favoritado ou fixado no momento. Use a estrela ao lado do nome de qualquer produto para fixá-lo aqui.</p>
                 )}
               </div>
             </div>
@@ -764,6 +785,7 @@ export default function App() {
                           onRename={handleRenameProduct}
                           onUpdateCollection={handleUpdateCollection}
                           onUpdateTargetPrice={handleUpdateTargetPrice}
+                          onTogglePin={handleTogglePin}
                           onToggleBudget={handleToggleBudget}
                           isInBudget={budgetItemIds.includes(prod.id)}
                         />

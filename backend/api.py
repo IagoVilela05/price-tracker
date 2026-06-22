@@ -17,7 +17,8 @@ from database.db_manager import (
     init_db, add_product, get_all_products, get_product,
     delete_product, add_price_reading, get_last_price, get_price_history,
     get_price_stats, update_product_name, get_last_price_installments,
-    update_product_collection, get_latest_scan_time, update_product_target_price
+    update_product_collection, get_latest_scan_time, update_product_target_price,
+    update_product_pinned
 )
 from scrapers import get_scraper_class_for_url
 from main import run_price_check
@@ -57,6 +58,9 @@ class ProductCollectionUpdate(BaseModel):
 class ProductTargetPriceUpdate(BaseModel):
     target_price: float | None = None
 
+class ProductPinnedUpdate(BaseModel):
+    pinned: bool
+
 class ProductResponse(BaseModel):
     id: int
     name: str
@@ -65,6 +69,7 @@ class ProductResponse(BaseModel):
     target_price: float | None = None
     created_at: str
     collection: str | None = None
+    pinned: int | None = 0
     last_price: float = None
     last_price_installments: float = None
     stats: dict = None
@@ -259,6 +264,16 @@ def update_single_product_target_price(product_id: int, payload: ProductTargetPr
     
     update_product_target_price(product_id, payload.target_price)
     return {"message": "Preço alvo do produto atualizado com sucesso.", "target_price": payload.target_price}
+
+@app.patch("/api/products/{product_id}/pinned")
+def update_single_product_pinned(product_id: int, payload: ProductPinnedUpdate):
+    """Atualiza o status de favorito/fixado de um produto."""
+    prod = get_product(product_id)
+    if not prod:
+        raise HTTPException(status_code=404, detail="Produto não encontrado.")
+    
+    update_product_pinned(product_id, payload.pinned)
+    return {"message": "Status de favorito do produto atualizado com sucesso.", "pinned": payload.pinned}
 
 @app.get("/api/products/{product_id}/history")
 def get_product_price_chart_history(product_id: int):

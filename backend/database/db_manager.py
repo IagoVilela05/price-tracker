@@ -53,6 +53,9 @@ def init_db():
     # Roda a migração para tornar o preço alvo opcional
     migrate_target_price_nullable()
 
+    # Roda a migração para adicionar favoritos/fixados
+    migrate_add_pinned()
+
 import re
 
 def clean_product_name(name: str) -> str:
@@ -179,6 +182,31 @@ def migrate_target_price_nullable():
                 print("✅ Migração de 'target_price' nullable concluída com sucesso!")
     except Exception as e:
         print(f"⚠️ Erro ao rodar migração para target_price nullable: {e}")
+
+def migrate_add_pinned():
+    """Adiciona a coluna pinned à tabela de produtos se não existir."""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA table_info(products)")
+            columns = [row["name"] for row in cursor.fetchall()]
+            if "pinned" not in columns:
+                cursor.execute("ALTER TABLE products ADD COLUMN pinned INTEGER DEFAULT 0")
+                conn.commit()
+                print("✅ Coluna 'pinned' adicionada com sucesso no SQLite.")
+    except Exception as e:
+        print(f"⚠️ Erro ao rodar migração de favoritos: {e}")
+
+def update_product_pinned(product_id: int, pinned: bool):
+    """Atualiza a coluna pinned (favorito/fixado) de um produto no banco de dados."""
+    val = 1 if pinned else 0
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE products SET pinned = ? WHERE id = ?",
+            (val, product_id)
+        )
+        conn.commit()
 
 def update_product_name(product_id: int, new_name: str):
     """Atualiza o nome (apelido) de um produto no banco de dados."""

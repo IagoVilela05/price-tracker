@@ -35,6 +35,7 @@ export default function ProductCard({
   onRename, 
   onUpdateCollection, 
   onUpdateTargetPrice,
+  onTogglePin,
   onToggleBudget, 
   isInBudget,
   viewMode = 'row'
@@ -71,7 +72,14 @@ export default function ProductCard({
     return (
       <tr className={isBeaten ? 'target-beaten' : ''}>
         <td>
-          <div className="watchlist-product-cell">
+          <div className="watchlist-product-cell" style={{ display: 'flex', alignItems: 'center' }}>
+            <span 
+              onClick={() => onTogglePin(product.id, !product.pinned)}
+              style={{ cursor: 'pointer', marginRight: '10px', color: !!product.pinned ? 'var(--accent-primary)' : 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', transition: 'color 0.2s' }}
+              title={!!product.pinned ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+            >
+              <i className={!!product.pinned ? "fa-solid fa-star" : "fa-regular fa-star"} style={{ fontSize: '15px' }}></i>
+            </span>
             <div className="watchlist-product-details">
               <a 
                 href={product.url} 
@@ -247,7 +255,14 @@ export default function ProductCard({
           )}
         </div>
         
-        <h4 className="product-name" style={{ fontFamily: "'Playfair Display', serif", fontSize: '16px', fontWeight: '700', lineHeight: '1.4' }}>
+        <h4 className="product-name" style={{ fontFamily: "'Playfair Display', serif", fontSize: '16px', fontWeight: '700', lineHeight: '1.4', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+          <span 
+            onClick={() => onTogglePin(product.id, !product.pinned)}
+            style={{ cursor: 'pointer', color: !!product.pinned ? 'var(--accent-primary)' : 'var(--text-muted)', flexShrink: 0, marginTop: '2px', transition: 'color 0.2s' }}
+            title={!!product.pinned ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          >
+            <i className={!!product.pinned ? "fa-solid fa-star" : "fa-regular fa-star"} style={{ fontSize: '14px' }}></i>
+          </span>
           <a href={product.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
             {product.name}
           </a>
