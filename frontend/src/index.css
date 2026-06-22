@@ -1910,6 +1910,13 @@ body {
 .add-product-drawer-container.active {
     right: 0;
 }
+.add-product-form-inner {
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px);
+}
 .add-product-drawer-backdrop {
     position: fixed;
     top: 0;

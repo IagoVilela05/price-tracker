@@ -203,6 +203,16 @@ def update_product_collection(product_id: int, collection: str):
         )
         conn.commit()
 
+def update_product_target_price(product_id: int, target_price: float | None):
+    """Atualiza o preço alvo de um produto no banco de dados."""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE products SET target_price = ? WHERE id = ?",
+            (target_price, product_id)
+        )
+        conn.commit()
+
 def add_product(name: str, store: str, url: str, target_price: float | None = None, collection: str = None) -> int:
     """Cadastra um novo produto para monitoramento. Retorna o ID do produto criado."""
     # Aplica a limpeza de nome automaticamente antes de cadastrar no banco

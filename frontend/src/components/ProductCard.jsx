@@ -34,6 +34,7 @@ export default function ProductCard({
   onShowHistory, 
   onRename, 
   onUpdateCollection, 
+  onUpdateTargetPrice,
   onToggleBudget, 
   isInBudget,
   viewMode = 'row'
@@ -161,6 +162,27 @@ export default function ProductCard({
               title="Ver histórico de preços"
             >
               <i className="fa-solid fa-chart-line"></i>
+            </button>
+
+            <button 
+              onClick={() => {
+                const newTarget = prompt(
+                  "Editar preço alvo (R$):", 
+                  product.target_price !== null && product.target_price !== undefined ? product.target_price : ""
+                );
+                if (newTarget !== null) {
+                  const parsed = newTarget.trim() === "" ? null : parseFloat(newTarget.replace(",", "."));
+                  if (newTarget.trim() !== "" && (isNaN(parsed) || parsed <= 0)) {
+                    alert("Por favor, insira um valor numérico válido positivo ou deixe em branco.");
+                    return;
+                  }
+                  onUpdateTargetPrice(product.id, parsed);
+                }
+              }} 
+              className="watchlist-action-btn"
+              title="Editar preço alvo"
+            >
+              <i className="fa-solid fa-bullseye"></i>
             </button>
             
             <button 
@@ -306,6 +328,27 @@ export default function ProductCard({
             title="Histórico"
           >
             <i className="fa-solid fa-chart-line"></i>
+          </button>
+          <button 
+            onClick={() => {
+              const newTarget = prompt(
+                "Editar preço alvo (R$):", 
+                product.target_price !== null && product.target_price !== undefined ? product.target_price : ""
+              );
+              if (newTarget !== null) {
+                const parsed = newTarget.trim() === "" ? null : parseFloat(newTarget.replace(",", "."));
+                if (newTarget.trim() !== "" && (isNaN(parsed) || parsed <= 0)) {
+                  alert("Por favor, insira um valor numérico válido positivo ou deixe em branco.");
+                  return;
+                }
+                onUpdateTargetPrice(product.id, parsed);
+              }
+            }}
+            className="card-btn card-btn-primary"
+            style={{ padding: '6px 10px', fontSize: '11px', background: 'var(--bg-main)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}
+            title="Editar preço alvo"
+          >
+            <i className="fa-solid fa-bullseye"></i>
           </button>
           <button 
             onClick={() => onToggleBudget(product.id)}

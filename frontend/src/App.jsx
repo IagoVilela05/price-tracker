@@ -314,6 +314,25 @@ export default function App() {
     }
   };
 
+  // Update Product Target Price
+  const handleUpdateTargetPrice = async (id, targetPrice) => {
+    try {
+      const res = await fetch(`${API_URL}/products/${id}/target-price`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target_price: targetPrice })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Erro ao atualizar preço alvo');
+      }
+      showToast('Preço Alvo Atualizado', 'Preço alvo atualizado com sucesso!');
+      fetchDashboardData();
+    } catch (err) {
+      showToast('Erro ao Atualizar', err.message, true);
+    }
+  };
+
   // View Product Price Chart History Modal
   const handleShowHistory = async (product) => {
     try {
@@ -473,6 +492,7 @@ export default function App() {
                         onShowHistory={handleShowHistory} 
                         onRename={handleRenameProduct}
                         onUpdateCollection={handleUpdateCollection}
+                        onUpdateTargetPrice={handleUpdateTargetPrice}
                         onToggleBudget={handleToggleBudget}
                         isInBudget={budgetItemIds.includes(prod.id)}
                       />
@@ -499,6 +519,7 @@ export default function App() {
                         onShowHistory={handleShowHistory} 
                         onRename={handleRenameProduct}
                         onUpdateCollection={handleUpdateCollection}
+                        onUpdateTargetPrice={handleUpdateTargetPrice}
                         onToggleBudget={handleToggleBudget}
                         isInBudget={budgetItemIds.includes(prod.id)}
                       />
@@ -742,6 +763,7 @@ export default function App() {
                           onShowHistory={handleShowHistory} 
                           onRename={handleRenameProduct}
                           onUpdateCollection={handleUpdateCollection}
+                          onUpdateTargetPrice={handleUpdateTargetPrice}
                           onToggleBudget={handleToggleBudget}
                           isInBudget={budgetItemIds.includes(prod.id)}
                         />
