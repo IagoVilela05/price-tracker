@@ -345,45 +345,63 @@ export default function ProductCard({
       </div>
 
       {/* Sparkline Grafico no estilo da Opcao A (Quiet Luxury / Area Chart) */}
-      <div className="card-sparkline-container" style={{ width: '100%', marginTop: '20px', marginBottom: '8px' }} title="Tendência de preço (últimas verificações)">
-        <svg viewBox={`0 0 ${cardWidth} ${cardHeight}`} style={{ width: '100%', height: '40px', overflow: 'visible', display: 'block' }}>
-          <defs>
-            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} stopOpacity="0.15" />
-              <stop offset="100%" stopColor={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} stopOpacity="0.0" />
-            </linearGradient>
-          </defs>
-          <path
-            d={cardFillD}
-            fill={`url(#${gradId})`}
-            stroke="none"
-          />
-          <path
-            d={cardPathD}
-            fill="none"
-            stroke={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          {cardPointsList.length > 0 && (
-            <>
-              <circle
-                cx={cardLastX}
-                cy={cardLastY}
-                r="4.5"
-                fill={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
-                opacity="0.3"
-              />
-              <circle
-                cx={cardLastX}
-                cy={cardLastY}
-                r="2"
-                fill={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
-              />
-            </>
-          )}
-        </svg>
+      <div style={{ marginTop: '20px', marginBottom: '4px' }} title="Tendência de preço (últimas verificações)">
+        {/* Range labels (min/max) + chart side by side */}
+        <div style={{ display: 'flex', alignItems: 'stretch', gap: '8px' }}>
+          {/* Min label (bottom-left reference) */}
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', flexShrink: 0, paddingBottom: '2px' }}>
+            <span style={{ fontSize: '9px', fontFamily: "'Outfit', sans-serif", fontWeight: 600, color: 'var(--text-muted)', lineHeight: 1, whiteSpace: 'nowrap' }}>
+              {formatBRL(maxVal)}
+            </span>
+            <span style={{ fontSize: '9px', fontFamily: "'Outfit', sans-serif", fontWeight: 600, color: discountPct > 0 ? 'var(--accent-emerald)' : 'var(--text-muted)', lineHeight: 1, whiteSpace: 'nowrap' }}>
+              {formatBRL(minVal)}
+            </span>
+          </div>
+
+          {/* SVG chart — preserveAspectRatio="none" forces it to fill full width */}
+          <svg
+            viewBox={`0 0 ${cardWidth} ${cardHeight}`}
+            preserveAspectRatio="none"
+            style={{ flex: 1, height: '52px', display: 'block', overflow: 'visible' }}
+          >
+            <defs>
+              <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} stopOpacity="0.18" />
+                <stop offset="100%" stopColor={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+            {/* Baseline rule */}
+            <line
+              x1={cardPadding} y1={cardHeight - cardPadding}
+              x2={cardWidth - cardPadding} y2={cardHeight - cardPadding}
+              stroke="var(--border-color)"
+              strokeWidth="0.5"
+              strokeDasharray="2 2"
+            />
+            <path d={cardFillD} fill={`url(#${gradId})`} stroke="none" />
+            <path
+              d={cardPathD}
+              fill="none"
+              stroke={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"}
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+            />
+            {cardPointsList.length > 0 && (
+              <>
+                <circle cx={cardLastX} cy={cardLastY} r="5" fill={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} opacity="0.2" vectorEffect="non-scaling-stroke" />
+                <circle cx={cardLastX} cy={cardLastY} r="2.5" fill={discountPct > 0 ? "var(--accent-emerald)" : "var(--accent-primary)"} vectorEffect="non-scaling-stroke" />
+              </>
+            )}
+          </svg>
+        </div>
+        {/* Label count */}
+        <div style={{ textAlign: 'right', marginTop: '3px' }}>
+          <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: "'Outfit', sans-serif" }}>
+            {sparklinePoints.length} verificações
+          </span>
+        </div>
       </div>
 
       <div className="card-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', marginTop: '12px', display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
