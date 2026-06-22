@@ -117,7 +117,21 @@ export default function ProductCard({
           )}
         </td>
 
-        
+        <td>
+          <span className={`watchlist-variation ${discountPct > 0 ? 'text-emerald' : 'text-muted'}`}>
+            {discountPct > 0 ? (
+              <>
+                <i className="fa-solid fa-caret-down"></i> -{discountPct}%
+              </>
+            ) : (
+              'Estável'
+            )}
+          </span>
+          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
+            Mín: {formatBRL(product.stats?.min_price || product.last_price)}
+          </div>
+        </td>
+
         <td>
           <div className="watchlist-actions">
             <button 
@@ -147,32 +161,6 @@ export default function ProductCard({
               title="Editar preço alvo"
             >
               <i className="fa-solid fa-bullseye"></i>
-            </button>
-            
-            <button 
-              onClick={() => {
-                const newColl = prompt("Editar coleção do produto (deixe em branco para sem coleção):", product.collection || "");
-                if (newColl !== null) {
-                   onUpdateCollection(product.id, newColl.trim() || null);
-                }
-              }} 
-              className="watchlist-action-btn"
-              title="Editar Coleção"
-            >
-              <i className="fa-solid fa-folder-open"></i>
-            </button>
-
-            <button 
-              onClick={() => {
-                const newName = prompt("Editar nome / apelido do produto:", product.name);
-                if (newName !== null) {
-                  onRename(product.id, newName);
-                }
-              }} 
-              className="watchlist-action-btn"
-              title="Editar apelido"
-            >
-              <i className="fa-solid fa-pen"></i>
             </button>
             
             <button 
