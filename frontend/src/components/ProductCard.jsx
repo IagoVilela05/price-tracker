@@ -266,18 +266,7 @@ export default function ProductCard({
   return (
     <div className={`product-card ${isBeaten ? 'target-beaten' : ''}`}>
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <span className={`store-badge ${product.store.toLowerCase()}`} style={{ marginBottom: 0 }}>
-            {getStoreIcon(product.store)} {getStoreNameFormatted(product.store)}
-          </span>
-          {product.collection && (
-            <span className="product-collection-badge" style={{ fontSize: '11px' }}>
-              <i className="fa-solid fa-folder"></i> {product.collection}
-            </span>
-          )}
-        </div>
-        
-        <h4 className="product-name" style={{ fontFamily: "'Playfair Display', serif", fontSize: '16px', fontWeight: '700', lineHeight: '1.4', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+        <h4 className="product-name" style={{ fontFamily: "'Playfair Display', serif", fontSize: '16px', fontWeight: '700', lineHeight: '1.4', display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: 0 }}>
           <span 
             onClick={() => onTogglePin(product.id, !product.pinned)}
             style={{ cursor: 'pointer', color: !!product.pinned ? 'var(--accent-primary)' : 'var(--text-muted)', flexShrink: 0, marginTop: '2px', transition: 'color 0.2s' }}
@@ -395,12 +384,6 @@ export default function ProductCard({
               </>
             )}
           </svg>
-        </div>
-        {/* Label count */}
-        <div style={{ textAlign: 'right', marginTop: '3px' }}>
-          <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: "'Outfit', sans-serif" }}>
-            {sparklinePoints.length} verificações
-          </span>
         </div>
       </div>
 
