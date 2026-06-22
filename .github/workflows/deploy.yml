@@ -1,0 +1,54 @@
+name: Deploy PriceTracker to OCI VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Obter código do repositório
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Configurar Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
+
+    # 3. Compilar o Frontend React localmente no Runner
+    - name: Build Frontend
+      run: |
+        cd frontend
+        npm ci
+        npm run build
+
+    # 4. Configurar a Chave SSH no Runner do GitHub
+    - name: Configure SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.VM_IP }} >> ~/.ssh/known_hosts
+
+    # 5. Sincronizar os arquivos via rsync para a VM
+    - name: Sync Files to VM
+      run: |
+        rsync -avz -e "ssh -i ~/.ssh/id_rsa" \
+          --exclude '.git/' \
+          --exclude 'node_modules/' \
+          --exclude '.venv/' \
+          --exclude 'backend/price_tracker.db' \
+          ./ ubuntu@${{ secrets.VM_IP }}:~/price-tracker/
+
+    # 6. Reiniciar os Serviços Systemd na VM
+    - name: Restart Systemd Services
+      run: |
+        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.VM_IP }} \
+          "sudo systemctl restart precotracker-web precotracker-bot precotracker-scheduler"
