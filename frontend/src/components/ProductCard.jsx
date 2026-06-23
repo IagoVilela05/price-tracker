@@ -230,7 +230,9 @@ export default function ProductCard({
   
   const cardPointsList = sparklinePoints.map((val, index) => {
     const x = cardPadding + (index / (sparklinePoints.length - 1)) * (cardWidth - cardPadding * 2);
-    const y = (cardHeight - cardPadding) - ((val - minVal) / valRange) * (cardHeight - cardPadding * 2);
+    const y = maxVal === minVal 
+      ? cardHeight / 2 
+      : (cardHeight - cardPadding) - ((val - minVal) / valRange) * (cardHeight - cardPadding * 2);
     return { x, y };
   });
 
