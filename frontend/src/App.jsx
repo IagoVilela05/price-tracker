@@ -6,6 +6,7 @@ import ProductCard from './components/ProductCard';
 import HistoryChartModal from './components/HistoryChartModal';
 import BatchImportModal from './components/BatchImportModal';
 import BudgetDrawer from './components/BudgetDrawer';
+import CustomDialogModal from './components/CustomDialogModal';
 
 const formatDateTime = (dateStr) => {
   if (!dateStr) return '';
@@ -81,6 +82,85 @@ export default function App() {
   useEffect(() => {
     setSelectedProductIds([]);
   }, [activeStoreFilter, activeCollectionFilter, currentTab]);
+
+  // Custom Dialog Modal State and Helpers
+  const [dialogConfig, setDialogConfig] = useState({
+    visible: false,
+    type: 'alert',
+    title: '',
+    message: '',
+    defaultValue: '',
+    placeholder: '',
+    inputType: 'text',
+    onConfirm: () => {},
+    onCancel: () => {}
+  });
+
+  const showCustomAlert = (title, message) => {
+    return new Promise((resolve) => {
+      setDialogConfig({
+        visible: true,
+        type: 'alert',
+        title,
+        message,
+        defaultValue: '',
+        placeholder: '',
+        inputType: 'text',
+        onConfirm: () => {
+          setDialogConfig(prev => ({ ...prev, visible: false }));
+          resolve();
+        },
+        onCancel: () => {
+          setDialogConfig(prev => ({ ...prev, visible: false }));
+          resolve();
+        }
+      });
+    });
+  };
+
+  const showCustomConfirm = (title, message) => {
+    return new Promise((resolve) => {
+      setDialogConfig({
+        visible: true,
+        type: 'confirm',
+        title,
+        message,
+        defaultValue: '',
+        placeholder: '',
+        inputType: 'text',
+        onConfirm: () => {
+          setDialogConfig(prev => ({ ...prev, visible: false }));
+          resolve(true);
+        },
+        onCancel: () => {
+          setDialogConfig(prev => ({ ...prev, visible: false }));
+          resolve(false);
+        }
+      });
+    });
+  };
+
+  const showCustomPrompt = (title, message, defaultValue = '', placeholder = '', inputType = 'text') => {
+    return new Promise((resolve) => {
+      setDialogConfig({
+        visible: true,
+        type: 'prompt',
+        title,
+        message,
+        defaultValue,
+        placeholder,
+        inputType,
+        onConfirm: (val) => {
+          setDialogConfig(prev => ({ ...prev, visible: false }));
+          resolve(val);
+        },
+        onCancel: () => {
+          setDialogConfig(prev => ({ ...prev, visible: false }));
+          resolve(null);
+        }
+      });
+    });
+  };
 
   // Base API URL
   const API_URL = '/api';
@@ -257,8 +337,9 @@ export default function App() {
   };
 
   // Clear all items in budget
-  const handleClearBudget = () => {
-    if (confirm('Deseja realmente limpar todos os componentes do seu orçamento?')) {
+  const handleClearBudget = async () => {
+    const ok = await showCustomConfirm('Limpar Orçamento', 'Deseja realmente limpar todos os componentes do seu orçamento?');
+    if (ok) {
       setBudgetItemIds([]);
     }
   };
@@ -295,7 +376,8 @@ export default function App() {
     const count = selectedProductIds.length;
     if (!count) return;
 
-    if (!confirm(`Deseja realmente remover os ${count} produtos selecionados e todo o seu histórico de monitoramento?`)) {
+    const ok = await showCustomConfirm('Excluir em Lote', `Deseja realmente remover os ${count} produtos selecionados e todo o seu histórico de monitoramento?`);
+    if (!ok) {
       return;
     }
 
@@ -322,7 +404,10 @@ export default function App() {
     const count = selectedProductIds.length;
     if (!count) return;
 
-    const newColl = prompt(`Definir coleção para os ${count} produtos selecionados (deixe em branco para remover de todas as coleções):`);
+    const newColl = await showCustomPrompt(
+      'Definir Coleção em Lote',
+      `Definir coleção para os ${count} produtos selecionados (deixe em branco para remover de todas as coleções):`
+    );
     if (newColl === null) return;
 
     const collectionVal = newColl.trim() === "" ? null : newColl.trim();
@@ -348,7 +433,8 @@ export default function App() {
 
   // Delete Product
   const handleDeleteProduct = async (id) => {
-    if (!confirm('Deseja realmente remover este hardware e todo o seu histórico do monitoramento?')) {
+    const ok = await showCustomConfirm('Excluir Hardware', 'Deseja realmente remover este hardware e todo o seu histórico do monitoramento?');
+    if (!ok) {
       return;
     }
     try {
@@ -607,6 +693,8 @@ export default function App() {
                         onTogglePin={handleTogglePin}
                         onToggleBudget={handleToggleBudget}
                         isInBudget={budgetItemIds.includes(prod.id)}
+                        showPrompt={showCustomPrompt}
+                        showAlert={showCustomAlert}
                       />
                     ))}
                   </div>
@@ -635,6 +723,8 @@ export default function App() {
                         onTogglePin={handleTogglePin}
                         onToggleBudget={handleToggleBudget}
                         isInBudget={budgetItemIds.includes(prod.id)}
+                        showPrompt={showCustomPrompt}
+                        showAlert={showCustomAlert}
                       />
                     ))}
                   </div>
@@ -888,6 +978,8 @@ export default function App() {
                           isInBudget={budgetItemIds.includes(prod.id)}
                           isSelected={selectedProductIds.includes(prod.id)}
                           onToggleSelect={handleToggleSelectProduct}
+                          showPrompt={showCustomPrompt}
+                          showAlert={showCustomAlert}
                         />
                       ))}
                     </tbody>
@@ -934,6 +1026,7 @@ export default function App() {
             setIsAddFormOpen(false);
           }}
           existingCollections={existingCollections} 
+          showAlert={showCustomAlert}
         />
       </div>
 
@@ -1028,6 +1121,13 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* Custom Dialog Box Modal overlay */}
+      {dialogConfig.visible && (
+        <CustomDialogModal 
+          config={dialogConfig} 
+        />
+      )}
     </>
   );
 }

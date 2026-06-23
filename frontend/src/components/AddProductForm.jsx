@@ -10,7 +10,7 @@ import React, { useState } from 'react';
  * @param {Array<string>} [props.existingCollections=[]] - Coleções ativas salvas no banco para exibição no auto-complete datalist.
  * @returns {React.JSX.Element} Formulário de cadastro renderizado.
  */
-export default function AddProductForm({ onAddProduct, onBatchImport, existingCollections = [] }) {
+export default function AddProductForm({ onAddProduct, onBatchImport, existingCollections = [], showAlert }) {
   const [activeTab, setActiveTab] = useState('single');
   const [url, setUrl] = useState('');
   const [targetPrice, setTargetPrice] = useState('');
@@ -21,6 +21,14 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
   const [batchText, setBatchText] = useState('');
   const [jsonItems, setJsonItems] = useState([]);
   const [fileName, setFileName] = useState('');
+
+  const triggerAlert = (title, message) => {
+    if (showAlert) {
+      showAlert(title, message);
+    } else {
+      alert(message);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,15 +64,15 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
             setJsonItems(validItems);
             setBatchText(''); // Clear pasted text if file uploaded
           } else {
-            alert('O arquivo JSON não contém itens válidos com "url".');
+            triggerAlert('Erro de Importação', 'O arquivo JSON não contém itens válidos com "url".');
             setFileName('');
           }
         } else {
-          alert('O JSON deve ser uma lista (array) de produtos.');
+          triggerAlert('Formato Inválido', 'O JSON deve ser uma lista (array) de produtos.');
           setFileName('');
         }
       } catch (err) {
-        alert('Erro ao processar o arquivo JSON. Verifique a formatação.');
+        triggerAlert('Erro no Arquivo', 'Erro ao processar o arquivo JSON. Verifique a formatação.');
         setFileName('');
       }
     };
@@ -109,7 +117,7 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
     }
 
     if (itemsToImport.length === 0) {
-      alert('Nenhum item válido encontrado. Verifique o texto colado ou o arquivo JSON.');
+      triggerAlert('Dados Ausentes', 'Nenhum item válido encontrado. Verifique o texto colado ou o arquivo JSON.');
       return;
     }
 

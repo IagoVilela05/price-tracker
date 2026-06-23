@@ -40,9 +40,26 @@ export default function ProductCard({
   isInBudget,
   isSelected,
   onToggleSelect,
+  showPrompt,
+  showAlert,
   viewMode = 'row'
 }) {
   const isBeaten = product.last_price && product.target_price && product.last_price <= product.target_price;
+  
+  const triggerPrompt = async (title, message, defaultValue = '', placeholder = '', inputType = 'text') => {
+    if (showPrompt) {
+      return await showPrompt(title, message, defaultValue, placeholder, inputType);
+    }
+    return prompt(message, defaultValue);
+  };
+
+  const triggerAlert = async (title, message) => {
+    if (showAlert) {
+      await showAlert(title, message);
+    } else {
+      alert(message);
+    }
+  };
   
   // Calculate variation percentage compared to historical average
   let discountPct = 0;
@@ -102,8 +119,8 @@ export default function ProductCard({
                   {product.name}
                 </a>
                 <span 
-                  onClick={() => {
-                    const newName = prompt("Editar nome / apelido do produto:", product.name);
+                  onClick={async () => {
+                    const newName = await triggerPrompt("Editar Apelido", "Editar nome / apelido do produto:", product.name);
                     if (newName !== null && newName.trim() !== "") {
                       onRename(product.id, newName.trim());
                     }
@@ -123,8 +140,8 @@ export default function ProductCard({
                   <span 
                     className="product-collection-badge" 
                     title="Editar coleção (clique para alterar/remover)"
-                    onClick={() => {
-                      const newColl = prompt("Editar coleção do produto (deixe em branco para remover):", product.collection);
+                    onClick={async () => {
+                      const newColl = await triggerPrompt("Editar Coleção", "Editar coleção do produto (deixe em branco para remover):", product.collection);
                       if (newColl !== null) {
                         onUpdateCollection(product.id, newColl.trim() || null);
                       }
@@ -137,8 +154,8 @@ export default function ProductCard({
                   <span 
                     className="product-collection-badge" 
                     title="Adicionar a uma coleção"
-                    onClick={() => {
-                      const newColl = prompt("Adicionar a uma coleção / grupo:", "");
+                    onClick={async () => {
+                      const newColl = await triggerPrompt("Adicionar Coleção", "Adicionar a uma coleção / grupo:", "");
                       if (newColl !== null && newColl.trim() !== "") {
                         onUpdateCollection(product.id, newColl.trim());
                       }
@@ -192,15 +209,18 @@ export default function ProductCard({
             </button>
 
             <button 
-              onClick={() => {
-                const newTarget = prompt(
+              onClick={async () => {
+                const newTarget = await triggerPrompt(
+                  "Editar Preço Alvo",
                   "Editar preço alvo (R$):", 
-                  product.target_price !== null && product.target_price !== undefined ? product.target_price : ""
+                  product.target_price !== null && product.target_price !== undefined ? String(product.target_price) : "",
+                  "Ex: 1200.00",
+                  "number"
                 );
                 if (newTarget !== null) {
                   const parsed = newTarget.trim() === "" ? null : parseFloat(newTarget.replace(",", "."));
                   if (newTarget.trim() !== "" && (isNaN(parsed) || parsed <= 0)) {
-                    alert("Por favor, insira um valor numérico válido positivo ou deixe em branco.");
+                    await triggerAlert("Valor Inválido", "Por favor, insira um valor numérico válido positivo ou deixe em branco.");
                     return;
                   }
                   onUpdateTargetPrice(product.id, parsed);
@@ -273,8 +293,8 @@ export default function ProductCard({
             {product.name}
           </a>
           <span 
-            onClick={() => {
-              const newName = prompt("Editar nome / apelido do produto:", product.name);
+            onClick={async () => {
+              const newName = await triggerPrompt("Editar Apelido", "Editar nome / apelido do produto:", product.name);
               if (newName !== null && newName.trim() !== "") {
                 onRename(product.id, newName.trim());
               }
@@ -424,15 +444,18 @@ export default function ProductCard({
           <i className="fa-solid fa-chart-line"></i>
         </button>
         <button 
-          onClick={() => {
-            const newTarget = prompt(
+          onClick={async () => {
+            const newTarget = await triggerPrompt(
+              "Editar Preço Alvo",
               "Editar preço alvo (R$):", 
-              product.target_price !== null && product.target_price !== undefined ? product.target_price : ""
+              product.target_price !== null && product.target_price !== undefined ? String(product.target_price) : "",
+              "Ex: 1200.00",
+              "number"
             );
             if (newTarget !== null) {
               const parsed = newTarget.trim() === "" ? null : parseFloat(newTarget.replace(",", "."));
               if (newTarget.trim() !== "" && (isNaN(parsed) || parsed <= 0)) {
-                alert("Por favor, insira um valor numérico válido positivo ou deixe em branco.");
+                await triggerAlert("Valor Inválido", "Por favor, insira um valor numérico válido positivo ou deixe em branco.");
                 return;
               }
               onUpdateTargetPrice(product.id, parsed);

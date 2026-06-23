@@ -2143,3 +2143,149 @@ body {
 .batch-btn-clear:hover {
     color: #fff;
 }
+
+/* Custom Dialog Modals CSS */
+.dialog-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: dialogFadeIn 0.2s ease-out forwards;
+}
+
+@keyframes dialogFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.dialog-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+    animation: dialogScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dialogScaleUp {
+    from {
+        transform: scale(0.95) translateY(10px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.dialog-header {
+    padding: 20px 24px 12px;
+}
+
+.dialog-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dialog-header-icon {
+    font-size: 16px;
+}
+
+.dialog-header-icon.alert {
+    color: var(--accent-danger);
+}
+
+.dialog-header-icon.confirm {
+    color: var(--accent-cyan);
+}
+
+.dialog-header-icon.prompt {
+    color: var(--accent-primary);
+}
+
+.dialog-body {
+    padding: 0 24px 20px;
+}
+
+.dialog-message {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.dialog-input-wrapper {
+    margin-top: 10px;
+}
+
+.dialog-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    transition: var(--transition-smooth);
+}
+
+.dialog-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-primary-glow);
+}
+
+.dialog-footer {
+    padding: 16px 24px 20px;
+    background: var(--bg-card-hover);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.dialog-btn {
+    padding: 8px 18px;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    font-family: 'Outfit', sans-serif;
+    border: 1px solid transparent;
+}
+
+.dialog-btn-cancel {
+    background: transparent;
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.dialog-btn-cancel:hover {
+    background: var(--bg-main);
+    color: var(--text-primary);
+}
+
+.dialog-btn-confirm {
+    background: var(--accent-primary);
+    color: #fff;
+}
+
+.dialog-btn-confirm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--accent-primary-glow);
+}
+
