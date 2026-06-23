@@ -148,7 +148,7 @@ export default function ProductCard({
             {formatBRL(product.last_price)}
             <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500, marginLeft: '4px' }}>Pix</span>
           </div>
-          {product.last_price_installments && product.last_price_installments > product.last_price && (
+          {product.last_price_installments && (
             <div className="watchlist-price-installments" title="Parcelado">
               <i className="fa-solid fa-credit-card" style={{ fontSize: '9px', marginRight: '3px' }}></i>
               {formatBRL(product.last_price_installments)}
@@ -290,7 +290,7 @@ export default function ProductCard({
           </div>
         </div>
 
-        {product.last_price_installments && product.last_price_installments > product.last_price ? (
+        {product.last_price_installments ? (
           <div className="price-details dual-price" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', marginTop: '12px' }}>
             <div className="dual-price-main">
               <div className="price-info">
@@ -334,13 +334,15 @@ export default function ProductCard({
         {/* Range labels (min/max) + chart side by side */}
         <div style={{ display: 'flex', alignItems: 'stretch', gap: '8px' }}>
           {/* Min label (bottom-left reference) */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', flexShrink: 0, paddingBottom: '2px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: minVal === maxVal ? 'center' : 'space-between', alignItems: 'flex-end', flexShrink: 0, paddingBottom: '2px' }}>
             <span style={{ fontSize: '9px', fontFamily: "'Outfit', sans-serif", fontWeight: 600, color: 'var(--text-muted)', lineHeight: 1, whiteSpace: 'nowrap' }}>
               {formatBRL(maxVal)}
             </span>
-            <span style={{ fontSize: '9px', fontFamily: "'Outfit', sans-serif", fontWeight: 600, color: discountPct > 0 ? 'var(--accent-emerald)' : 'var(--text-muted)', lineHeight: 1, whiteSpace: 'nowrap' }}>
-              {formatBRL(minVal)}
-            </span>
+            {minVal !== maxVal && (
+              <span style={{ fontSize: '9px', fontFamily: "'Outfit', sans-serif", fontWeight: 600, color: discountPct > 0 ? 'var(--accent-emerald)' : 'var(--text-muted)', lineHeight: 1, whiteSpace: 'nowrap' }}>
+                {formatBRL(minVal)}
+              </span>
+            )}
           </div>
 
           {/* Wrap SVG + dot in relative container so the HTML dot can be placed precisely */}
