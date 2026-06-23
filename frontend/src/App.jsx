@@ -78,6 +78,9 @@ export default function App() {
   // Bulk Selection State
   const [selectedProductIds, setSelectedProductIds] = useState([]);
 
+  // Watchlist Sorting State (default sorted alphabetically A-Z)
+  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
+
   // Reset selection when tab or filters change
   useEffect(() => {
     setSelectedProductIds([]);
@@ -595,6 +598,79 @@ export default function App() {
     return prod.collection === activeCollectionFilter;
   });
 
+  // Sort helper for Watchlist table
+  const requestSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) {
+      return <i className="fa-solid fa-sort" style={{ marginLeft: '6px', opacity: 0.35, fontSize: '10px' }}></i>;
+    }
+    if (sortConfig.direction === 'asc') {
+      return <i className="fa-solid fa-sort-up" style={{ marginLeft: '6px', color: 'var(--accent-primary)', fontSize: '10px' }}></i>;
+    }
+    return <i className="fa-solid fa-sort-down" style={{ marginLeft: '6px', color: 'var(--accent-primary)', fontSize: '10px' }}></i>;
+  };
+
+  // Sorting logic for the watchlist
+  const sortedProducts = React.useMemo(() => {
+    let sortableItems = [...filteredProducts];
+    if (sortConfig.key) {
+      sortableItems.sort((a, b) => {
+        let aValue;
+        let bValue;
+
+        if (sortConfig.key === 'name') {
+          aValue = (a.name || '').toLowerCase();
+          bValue = (b.name || '').toLowerCase();
+          if (aValue < bValue) {
+            return sortConfig.direction === 'asc' ? -1 : 1;
+          }
+          if (aValue > bValue) {
+            return sortConfig.direction === 'asc' ? 1 : -1;
+          }
+          return 0;
+        }
+
+        if (sortConfig.key === 'last_price') {
+          const aPrice = a.last_price;
+          const bPrice = b.last_price;
+          if (aPrice === null || aPrice === undefined) return 1;
+          if (bPrice === null || bPrice === undefined) return -1;
+          aValue = aPrice;
+          bValue = bPrice;
+        } else if (sortConfig.key === 'discountPct') {
+          const getDiscountPct = (p) => {
+            if (p.last_price && p.stats?.avg_price && p.last_price < p.stats.avg_price) {
+              return ((p.stats.avg_price - p.last_price) / p.stats.avg_price) * 100;
+            }
+            return 0;
+          };
+          aValue = getDiscountPct(a);
+          bValue = getDiscountPct(b);
+        } else {
+          aValue = a[sortConfig.key];
+          bValue = b[sortConfig.key];
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [filteredProducts, sortConfig]);
+
+
   // Sort products by discount percentage for the dashboard "Maiores Descontos" section
   const productsWithDiscounts = productsList
     .map(prod => {
@@ -957,14 +1033,20 @@ export default function App() {
                             style={{ cursor: 'pointer', transform: 'scale(1.1)' }}
                           />
                         </th>
-                        <th>Produto</th>
-                        <th>Preço Atual</th>
-                        <th>Variação</th>
+                        <th onClick={() => requestSort('name')} className="sortable-header" style={{ cursor: 'pointer', userSelect: 'none' }}>
+                          Produto {getSortIcon('name')}
+                        </th>
+                        <th onClick={() => requestSort('last_price')} className="sortable-header" style={{ cursor: 'pointer', userSelect: 'none' }}>
+                          Preço Atual {getSortIcon('last_price')}
+                        </th>
+                        <th onClick={() => requestSort('discountPct')} className="sortable-header" style={{ cursor: 'pointer', userSelect: 'none' }}>
+                          Variação {getSortIcon('discountPct')}
+                        </th>
                         <th style={{ textAlign: 'right' }}>Ações</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredProducts.map(prod => (
+                      {sortedProducts.map(prod => (
                         <ProductCard 
                           key={prod.id} 
                           product={prod} 

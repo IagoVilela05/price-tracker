@@ -1789,6 +1789,14 @@ body {
     padding: 16px 20px;
     border-bottom: 1px solid var(--border-color);
 }
+.watchlist-table th.sortable-header {
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+.watchlist-table th.sortable-header:hover {
+    background: hsl(35, 15%, 94%);
+    color: var(--text-primary);
+}
 .watchlist-table td {
     padding: 16px 20px;
     border-bottom: 1px solid var(--border-color);
