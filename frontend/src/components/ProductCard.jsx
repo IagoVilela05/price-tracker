@@ -292,43 +292,33 @@ export default function ProductCard({
           </div>
         </div>
 
-        {product.last_price_installments ? (
-          <div className="price-details dual-price" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', marginTop: '12px' }}>
-            <div className="dual-price-main">
-              <div className="price-info">
-                <span className="price-label">⚡ À Vista</span>
-                <span className="price-value" style={{ fontSize: '18px' }}>{formatBRL(product.last_price)}</span>
-              </div>
-              {product.target_price && (
-                <div className="target-info">
-                  <span className="target-label">Preço Alvo</span>
-                  <span className="target-value">{formatBRL(product.target_price)}</span>
-                </div>
-              )}
-            </div>
-            <div className="dual-price-installment" style={{ borderTop: '1px dashed var(--border-color)' }}>
-              <span className="price-label">
-                <i className="fa-solid fa-credit-card"></i> Parcelado
-              </span>
-              <span className="installment-value">
-                {formatBRL(product.last_price_installments)}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="price-details" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', marginTop: '12px' }}>
+        <div className="price-details dual-price" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', marginTop: '12px' }}>
+          <div className="dual-price-main">
             <div className="price-info">
-              <span className="price-label">Preço Atual</span>
+              <span className="price-label">⚡ À Vista</span>
               <span className="price-value" style={{ fontSize: '18px' }}>{formatBRL(product.last_price)}</span>
             </div>
-            {product.target_price && (
+            {product.last_price_installments && (
               <div className="target-info">
-                <span className="target-label">Preço Alvo</span>
-                <span className="target-value">{formatBRL(product.target_price)}</span>
+                <span className="target-label">
+                  <i className="fa-solid fa-credit-card"></i> Parcelado
+                </span>
+                <span className="target-value" style={{ fontSize: '15px' }}>{formatBRL(product.last_price_installments)}</span>
               </div>
             )}
           </div>
-        )}
+
+          {product.target_price && (
+            <div className="dual-price-installment" style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '8px', marginTop: '2px' }}>
+              <span className="price-label" style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                🎯 Preço Alvo
+              </span>
+              <span className="installment-value" style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                {formatBRL(product.target_price)}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Sparkline Grafico no estilo da Opcao A (Quiet Luxury / Area Chart) */}
