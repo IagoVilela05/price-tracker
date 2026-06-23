@@ -2049,5 +2049,97 @@ body {
     }
 }
 
+/* Floating Batch Action Bar */
+.batch-action-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: hsl(220, 20%, 15%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    animation: batchBarSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
+@keyframes batchBarSlideUp {
+    from {
+        transform: translate(-50%, 40px);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
 
+.batch-action-info {
+    font-size: 13px;
+    color: hsl(0, 0%, 90%);
+    font-family: 'Outfit', sans-serif;
+}
+
+.batch-action-count strong {
+    color: var(--accent-primary);
+    font-size: 15px;
+}
+
+.batch-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.batch-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Outfit', sans-serif;
+    border: 1px solid transparent;
+}
+
+.batch-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: hsl(0, 0%, 90%);
+}
+
+.batch-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.batch-btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+.batch-btn-danger:hover {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.45);
+    color: #fff;
+}
+
+.batch-btn-clear {
+    background: transparent;
+    border-color: transparent;
+    color: hsl(220, 10%, 65%);
+}
+
+.batch-btn-clear:hover {
+    color: #fff;
+}

@@ -74,6 +74,14 @@ export default function App() {
     isError: false
   });
 
+  // Bulk Selection State
+  const [selectedProductIds, setSelectedProductIds] = useState([]);
+
+  // Reset selection when tab or filters change
+  useEffect(() => {
+    setSelectedProductIds([]);
+  }, [activeStoreFilter, activeCollectionFilter, currentTab]);
+
   // Base API URL
   const API_URL = '/api';
 
@@ -255,6 +263,89 @@ export default function App() {
     }
   };
 
+  // Toggle selection of a single product
+  const handleToggleSelectProduct = (id) => {
+    setSelectedProductIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  // Toggle select all filtered products
+  const handleToggleSelectAll = () => {
+    const filteredIds = filteredProducts.map(p => p.id);
+    const allVisibleSelected = filteredIds.length > 0 && filteredIds.every(id => selectedProductIds.includes(id));
+
+    if (allVisibleSelected) {
+      setSelectedProductIds(prev => prev.filter(id => !filteredIds.includes(id)));
+    } else {
+      setSelectedProductIds(prev => {
+        const newSelection = [...prev];
+        filteredIds.forEach(id => {
+          if (!newSelection.includes(id)) {
+            newSelection.push(id);
+          }
+        });
+        return newSelection;
+      });
+    }
+  };
+
+  // Batch delete selected products
+  const handleBatchDelete = async () => {
+    const count = selectedProductIds.length;
+    if (!count) return;
+
+    if (!confirm(`Deseja realmente remover os ${count} produtos selecionados e todo o seu histórico de monitoramento?`)) {
+      return;
+    }
+
+    try {
+      await Promise.all(selectedProductIds.map(async (id) => {
+        const res = await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(`Delete failed for product ID ${id}`);
+      }));
+
+      // Clean up deleted items from budget too
+      setBudgetItemIds(prev => prev.filter(itemId => !selectedProductIds.includes(itemId)));
+
+      showToast('Ação Concluída', `${count} produtos foram removidos com sucesso.`);
+      setSelectedProductIds([]);
+      fetchDashboardData();
+    } catch (err) {
+      showToast('Erro ao Excluir', 'Falha ao remover alguns produtos selecionados.', true);
+      fetchDashboardData();
+    }
+  };
+
+  // Batch update collection
+  const handleBatchUpdateCollection = async () => {
+    const count = selectedProductIds.length;
+    if (!count) return;
+
+    const newColl = prompt(`Definir coleção para os ${count} produtos selecionados (deixe em branco para remover de todas as coleções):`);
+    if (newColl === null) return;
+
+    const collectionVal = newColl.trim() === "" ? null : newColl.trim();
+
+    try {
+      await Promise.all(selectedProductIds.map(async (id) => {
+        const res = await fetch(`${API_URL}/products/${id}/collection`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ collection: collectionVal })
+        });
+        if (!res.ok) throw new Error(`Update failed for product ID ${id}`);
+      }));
+
+      showToast('Ação Concluída', `Coleção de ${count} produtos atualizada com sucesso.`);
+      setSelectedProductIds([]);
+      fetchDashboardData();
+    } catch (err) {
+      showToast('Erro ao Atualizar', 'Falha ao atualizar coleção de alguns produtos.', true);
+      fetchDashboardData();
+    }
+  };
+
   // Delete Product
   const handleDeleteProduct = async (id) => {
     if (!confirm('Deseja realmente remover este hardware e todo o seu histórico do monitoramento?')) {
@@ -264,6 +355,7 @@ export default function App() {
       const res = await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete API failed');
       
+      setBudgetItemIds(prev => prev.filter(itemId => itemId !== id));
       showToast('Removido', 'Produto excluído com sucesso.');
       fetchDashboardData();
     } catch (err) {
@@ -767,6 +859,14 @@ export default function App() {
                   <table className="watchlist-table">
                     <thead>
                       <tr>
+                        <th style={{ width: '40px', paddingLeft: '12px', textAlign: 'center' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={filteredProducts.length > 0 && filteredProducts.every(p => selectedProductIds.includes(p.id))}
+                            onChange={handleToggleSelectAll}
+                            style={{ cursor: 'pointer', transform: 'scale(1.1)' }}
+                          />
+                        </th>
                         <th>Produto</th>
                         <th>Preço Atual</th>
                         <th>Variação</th>
@@ -786,6 +886,8 @@ export default function App() {
                           onTogglePin={handleTogglePin}
                           onToggleBudget={handleToggleBudget}
                           isInBudget={budgetItemIds.includes(prod.id)}
+                          isSelected={selectedProductIds.includes(prod.id)}
+                          onToggleSelect={handleToggleSelectProduct}
                         />
                       ))}
                     </tbody>
@@ -880,6 +982,38 @@ export default function App() {
         onToggleItem={handleToggleBudget}
         onClear={handleClearBudget}
       />
+
+      {/* Floating Batch Action Bar */}
+      {selectedProductIds.length > 0 && (
+        <div className="batch-action-bar">
+          <div className="batch-action-info">
+            <span className="batch-action-count">
+              Selecionado(s): <strong>{selectedProductIds.length}</strong> {selectedProductIds.length === 1 ? 'item' : 'itens'}
+            </span>
+          </div>
+          <div className="batch-action-buttons">
+            <button 
+              onClick={handleBatchUpdateCollection} 
+              className="batch-btn batch-btn-secondary"
+            >
+              <i className="fa-solid fa-folder-open"></i> Editar Coleção
+            </button>
+            <button 
+              onClick={handleBatchDelete} 
+              className="batch-btn batch-btn-danger"
+            >
+              <i className="fa-solid fa-trash-can"></i> Excluir
+            </button>
+            <button 
+              onClick={() => setSelectedProductIds([])} 
+              className="batch-btn batch-btn-clear"
+              title="Limpar seleção"
+            >
+              <i className="fa-solid fa-xmark"></i> Cancelar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Reactive Toast pop-ups */}
       <div className={`toast ${toast.visible ? 'visible' : ''}`}>

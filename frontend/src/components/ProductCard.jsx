@@ -36,8 +36,10 @@ export default function ProductCard({
   onUpdateCollection, 
   onUpdateTargetPrice,
   onTogglePin,
-  onToggleBudget, 
+  onToggleBudget,
   isInBudget,
+  isSelected,
+  onToggleSelect,
   viewMode = 'row'
 }) {
   const isBeaten = product.last_price && product.target_price && product.last_price <= product.target_price;
@@ -70,7 +72,15 @@ export default function ProductCard({
 
   if (viewMode === 'row') {
     return (
-      <tr className={isBeaten ? 'target-beaten' : ''}>
+      <tr className={`${isBeaten ? 'target-beaten' : ''} ${isSelected ? 'row-selected' : ''}`}>
+        <td style={{ width: '40px', paddingLeft: '12px', verticalAlign: 'middle', textAlign: 'center' }}>
+          <input 
+            type="checkbox" 
+            checked={!!isSelected} 
+            onChange={() => onToggleSelect(product.id)}
+            style={{ cursor: 'pointer', transform: 'scale(1.1)' }}
+          />
+        </td>
         <td>
           <div className="watchlist-product-cell" style={{ display: 'flex', alignItems: 'center' }}>
             <span 
