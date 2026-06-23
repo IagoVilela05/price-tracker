@@ -81,22 +81,61 @@ export default function ProductCard({
               <i className={!!product.pinned ? "fa-solid fa-star" : "fa-regular fa-star"} style={{ fontSize: '15px' }}></i>
             </span>
             <div className="watchlist-product-details">
-              <a 
-                href={product.url} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="watchlist-product-name"
-                title={product.name}
-              >
-                {product.name}
-              </a>
-              <div className="watchlist-product-meta">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <a 
+                  href={product.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="watchlist-product-name"
+                  title={product.name}
+                >
+                  {product.name}
+                </a>
+                <span 
+                  onClick={() => {
+                    const newName = prompt("Editar nome / apelido do produto:", product.name);
+                    if (newName !== null && newName.trim() !== "") {
+                      onRename(product.id, newName.trim());
+                    }
+                  }}
+                  style={{ cursor: 'pointer', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', opacity: 0.6, transition: 'opacity 0.2s' }}
+                  title="Editar apelido"
+                  className="edit-name-btn"
+                >
+                  <i className="fa-solid fa-pen" style={{ fontSize: '10px' }}></i>
+                </span>
+              </div>
+              <div className="watchlist-product-meta" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
                 <span className={`store-badge mini ${product.store.toLowerCase()}`}>
                   {getStoreIcon(product.store)} {getStoreNameFormatted(product.store)}
                 </span>
-                {product.collection && (
-                  <span className="product-collection-badge" title="Coleção">
+                {product.collection ? (
+                  <span 
+                    className="product-collection-badge" 
+                    title="Editar coleção (clique para alterar/remover)"
+                    onClick={() => {
+                      const newColl = prompt("Editar coleção do produto (deixe em branco para remover):", product.collection);
+                      if (newColl !== null) {
+                        onUpdateCollection(product.id, newColl.trim() || null);
+                      }
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <i className="fa-solid fa-folder"></i> {product.collection}
+                  </span>
+                ) : (
+                  <span 
+                    className="product-collection-badge" 
+                    title="Adicionar a uma coleção"
+                    onClick={() => {
+                      const newColl = prompt("Adicionar a uma coleção / grupo:", "");
+                      if (newColl !== null && newColl.trim() !== "") {
+                        onUpdateCollection(product.id, newColl.trim());
+                      }
+                    }}
+                    style={{ cursor: 'pointer', opacity: 0.5, borderStyle: 'dashed', background: 'transparent' }}
+                  >
+                    <i className="fa-solid fa-folder-plus"></i> + Coleção
                   </span>
                 )}
               </div>
@@ -210,10 +249,10 @@ export default function ProductCard({
   return (
     <div className={`product-card ${isBeaten ? 'target-beaten' : ''}`}>
       <div>
-        <h4 className="product-name" style={{ fontFamily: "'Playfair Display', serif", fontSize: '16px', fontWeight: '700', lineHeight: '1.4', display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: 0 }}>
+        <h4 className="product-name" style={{ fontFamily: "'Playfair Display', serif", fontSize: '16px', fontWeight: '700', lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
           <span 
             onClick={() => onTogglePin(product.id, !product.pinned)}
-            style={{ cursor: 'pointer', color: !!product.pinned ? 'var(--accent-primary)' : 'var(--text-muted)', flexShrink: 0, marginTop: '2px', transition: 'color 0.2s' }}
+            style={{ cursor: 'pointer', color: !!product.pinned ? 'var(--accent-primary)' : 'var(--text-muted)', flexShrink: 0, transition: 'color 0.2s' }}
             title={!!product.pinned ? "Remover dos favoritos" : "Adicionar aos favoritos"}
           >
             <i className={!!product.pinned ? "fa-solid fa-star" : "fa-regular fa-star"} style={{ fontSize: '14px' }}></i>
@@ -221,6 +260,19 @@ export default function ProductCard({
           <a href={product.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
             {product.name}
           </a>
+          <span 
+            onClick={() => {
+              const newName = prompt("Editar nome / apelido do produto:", product.name);
+              if (newName !== null && newName.trim() !== "") {
+                onRename(product.id, newName.trim());
+              }
+            }}
+            style={{ cursor: 'pointer', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', opacity: 0.6, transition: 'opacity 0.2s' }}
+            title="Editar apelido"
+            className="edit-name-btn"
+          >
+            <i className="fa-solid fa-pen" style={{ fontSize: '10px' }}></i>
+          </span>
         </h4>
 
         <div className="card-stats-row" style={{ marginTop: '12px', background: 'var(--bg-main)', border: '1px solid var(--border-color)' }}>
