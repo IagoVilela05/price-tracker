@@ -153,7 +153,7 @@ export default function AddProductForm({ onAddProduct, onBatchImport, existingCo
             <i className="fa-solid fa-plus-circle text-cyan"></i> Novo Link para Monitorar
           </h3>
           <p className="panel-description">
-            Adicione um link válido de hardware das lojas parceiras e defina o preço-alvo desejado.
+            Adicione um link válido de produto das lojas parceiras e defina o preço-alvo desejado.
           </p>
           
           <form onSubmit={handleSubmit} className="form-container">

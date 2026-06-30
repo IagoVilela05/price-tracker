@@ -436,7 +436,7 @@ export default function App() {
 
   // Delete Product
   const handleDeleteProduct = async (id) => {
-    const ok = await showCustomConfirm('Excluir Hardware', 'Deseja realmente remover este hardware e todo o seu histórico do monitoramento?');
+    const ok = await showCustomConfirm('Excluir Produto', 'Deseja realmente remover este produto e todo o seu histórico do monitoramento?');
     if (!ok) {
       return;
     }
@@ -1072,7 +1072,7 @@ export default function App() {
                   <i className="fa-solid fa-microchip-slash empty-state-icon" style={{ fontSize: '40px', color: 'var(--text-muted)', marginBottom: '15px' }}></i>
                   <p style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Nenhum produto cadastrado {activeStoreFilter !== 'all' || activeCollectionFilter !== 'all' ? 'para este filtro' : ''} ainda.</p>
                   {activeStoreFilter === 'all' && activeCollectionFilter === 'all' && (
-                    <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '5px' }}>Use o botão "Cadastrar Hardware" no topo para adicionar seu primeiro hardware!</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '5px' }}>Use o botão "Cadastrar Produto" no topo para adicionar seu primeiro produto!</p>
                   )}
                 </div>
               )}
@@ -1088,7 +1088,7 @@ export default function App() {
       />
       <div className={`add-product-drawer-container ${isAddFormOpen ? 'active' : ''}`}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 24px 0 24px' }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)' }}>Cadastrar Hardware</h2>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)' }}>Cadastrar Produto</h2>
           <button 
             onClick={() => setIsAddFormOpen(false)}
             style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: 'var(--text-secondary)' }}

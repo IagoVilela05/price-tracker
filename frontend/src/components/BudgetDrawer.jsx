@@ -95,7 +95,7 @@ export default function BudgetDrawer({ active, onClose, products = [], selectedI
             <label className="form-label" style={{ fontSize: '11px' }}>Adicionar Componente Cadastrado</label>
             <div className="budget-select-wrapper">
               <select onChange={handleQuickAdd} defaultValue="">
-                <option value="" disabled>Selecione um hardware...</option>
+                <option value="" disabled>Selecione um produto...</option>
                 {availableProducts.map(p => (
                   <option key={p.id} value={p.id}>
                     {p.name} ({getStoreNameFormatted(p.store)} - {formatBRL(p.last_price)})

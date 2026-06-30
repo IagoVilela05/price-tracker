@@ -9,7 +9,7 @@ export default function Header({ isScanning, onSync, statusText, currentTab, set
         </div>
         <div>
           <h1 className="app-title">Price<span className="accent-text">Tracker</span></h1>
-          <p className="app-subtitle">Monitoramento Inteligente de Hardware</p>
+          <p className="app-subtitle">Monitoramento Inteligente de Produtos</p>
         </div>
       </div>
       
@@ -46,7 +46,7 @@ export default function Header({ isScanning, onSync, statusText, currentTab, set
           onClick={onAddClick}
           className="btn btn-primary"
         >
-          <i className="fa-solid fa-plus"></i> Cadastrar Hardware
+          <i className="fa-solid fa-plus"></i> Cadastrar Produto
         </button>
       </div>
     </header>
