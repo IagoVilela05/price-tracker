@@ -7,6 +7,8 @@ import HistoryChartModal from './components/HistoryChartModal';
 import BatchImportModal from './components/BatchImportModal';
 import BudgetDrawer from './components/BudgetDrawer';
 import CustomDialogModal from './components/CustomDialogModal';
+import ProductCarousel from './components/ProductCarousel';
+import DashboardAnalytics from './components/DashboardAnalytics';
 
 const formatDateTime = (dateStr) => {
   if (!dateStr) return '';
@@ -743,187 +745,225 @@ export default function App() {
         )}
 
         {currentTab === 'dashboard' ? (
-          /* Painel Geral / Dashboard View: Two-Column Responsive Layout */
-          <div className="dashboard-grid-layout" style={{ marginTop: '10px' }}>
-            
-            {/* Coluna da Esquerda (Destaques) */}
-            <div className="dashboard-sections" style={{ display: 'flex', flexDirection: 'column', gap: '45px' }}>
-              
-              {/* Box 1: Maiores Descontos */}
-              <div className="dashboard-section">
-                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '22px', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                  <i className="fa-solid fa-fire" style={{ color: 'var(--accent-primary)' }}></i> Maiores Descontos
-                </h3>
-                {productsWithDiscounts.length > 0 ? (
-                  <div className="product-grid">
-                    {productsWithDiscounts.slice(0, 4).map(prod => (
-                      <ProductCard 
-                        key={prod.id} 
-                        product={prod} 
-                        viewMode="card"
-                        onDelete={handleDeleteProduct} 
-                        onShowHistory={handleShowHistory} 
-                        onRename={handleRenameProduct}
-                        onUpdateCollection={handleUpdateCollection}
-                        onUpdateTargetPrice={handleUpdateTargetPrice}
-                        onTogglePin={handleTogglePin}
-                        onToggleBudget={handleToggleBudget}
-                        isInBudget={budgetItemIds.includes(prod.id)}
-                        showPrompt={showCustomPrompt}
-                        showAlert={showCustomAlert}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Nenhuma variação relevante detectada ainda.</p>
-                )}
+          productsList.length === 0 ? (
+            <div className="panel-card" style={{ padding: '40px', textAlign: 'center', marginTop: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ fontSize: '48px', color: 'var(--text-muted)', marginBottom: '20px' }}>
+                <i className="fa-solid fa-folder-open"></i>
               </div>
-
-              {/* Box 2: Produtos Favoritos */}
-              <div className="dashboard-section">
-                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '22px', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                  <i className="fa-solid fa-star" style={{ color: 'var(--accent-primary)' }}></i> Produtos Favoritos
-                </h3>
-                {pinnedProducts.length > 0 ? (
-                  <div className="product-grid">
-                    {pinnedProducts.map(prod => (
-                      <ProductCard 
-                        key={prod.id} 
-                        product={prod} 
-                        viewMode="card"
-                        onDelete={handleDeleteProduct} 
-                        onShowHistory={handleShowHistory} 
-                        onRename={handleRenameProduct}
-                        onUpdateCollection={handleUpdateCollection}
-                        onUpdateTargetPrice={handleUpdateTargetPrice}
-                        onTogglePin={handleTogglePin}
-                        onToggleBudget={handleToggleBudget}
-                        isInBudget={budgetItemIds.includes(prod.id)}
-                        showPrompt={showCustomPrompt}
-                        showAlert={showCustomAlert}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Nenhum produto favoritado ou fixado no momento. Use a estrela ao lado do nome de qualquer produto para fixá-lo aqui.</p>
-                )}
-              </div>
+              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '22px', fontWeight: 800, marginBottom: '10px', color: 'var(--text-primary)' }}>
+                Bem-vindo ao PriceTracker
+              </h3>
+              <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '24px', maxWidth: '500px', margin: '0 auto 24px auto', textAlign: 'center', lineHeight: '1.5' }}>
+                Você ainda não possui produtos cadastrados. Comece adicionando um link de produto (Amazon, Mercado Livre, KaBuM!, Pichau ou Terabyte) clicando no botão abaixo ou no topo.
+              </p>
+              <button onClick={() => setIsAddFormOpen(true)} className="btn btn-primary">
+                <i className="fa-solid fa-plus"></i> Cadastrar Meu Primeiro Produto
+              </button>
             </div>
-
-            {/* Coluna da Direita (Painel Analítico Lateral) */}
-            <aside style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+          ) : productsWithDiscounts.length === 0 ? (
+            /* Nova visualização quando não há descontos ativos (Opção C) */
+            <div className="dashboard-option-c-layout" style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+              <ProductCarousel 
+                products={productsList}
+                onDelete={handleDeleteProduct}
+                onShowHistory={handleShowHistory}
+                onRename={handleRenameProduct}
+                onUpdateCollection={handleUpdateCollection}
+                onUpdateTargetPrice={handleUpdateTargetPrice}
+                onTogglePin={handleTogglePin}
+                onToggleBudget={handleToggleBudget}
+                budgetItemIds={budgetItemIds}
+                showPrompt={showCustomPrompt}
+                showAlert={showCustomAlert}
+              />
+              <DashboardAnalytics 
+                productsList={productsList}
+                API_URL={API_URL}
+              />
+            </div>
+          ) : (
+            /* Painel Geral clássico com Maiores Descontos */
+            <div className="dashboard-grid-layout" style={{ marginTop: '10px' }}>
               
-              {/* Card 1: Distribuição de Lojas */}
-              <div className="panel-card" style={{ padding: '24px' }}>
-                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 800, marginBottom: '20px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <i className="fa-solid fa-chart-simple" style={{ color: 'var(--accent-primary)' }}></i> Cobertura de Lojas
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                  {storeDistribution.map(item => (
-                    <div key={item.key} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 600 }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-                          <i className={item.icon}></i> {item.name}
-                        </span>
-                        <span style={{ color: 'var(--text-primary)' }}>{item.count} {item.count === 1 ? 'item' : 'itens'}</span>
-                      </div>
-                      <div style={{ width: '100%', height: '6px', background: 'var(--bg-main)', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ width: `${item.pct}%`, height: '100%', background: 'var(--accent-emerald)', transition: 'width 0.5s ease-in-out' }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Card 2: Meu Orçamento Atual */}
-              <div className="panel-card" style={{ padding: '24px' }}>
-                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 800, marginBottom: '15px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <i className="fa-solid fa-calculator" style={{ color: 'var(--accent-primary)' }}></i> Meu Orçamento
-                </h3>
+              {/* Coluna da Esquerda (Destaques) */}
+              <div className="dashboard-sections" style={{ display: 'flex', flexDirection: 'column', gap: '45px' }}>
                 
-                {budgetItems.length > 0 ? (
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '15px' }}>
-                      <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 600 }}>Total Estimado</span>
-                      <span style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)' }}>{formatBRL(budgetTotal)}</span>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '15px', maxHeight: '140px', overflowY: 'auto', paddingRight: '4px' }}>
-                      {budgetItems.map(item => (
-                        <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '4px 0', borderBottom: '1px dashed var(--border-color)' }}>
-                          <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }} title={item.name}>{item.name}</span>
-                          <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{formatBRL(item.last_price)}</span>
-                        </div>
+                {/* Box 1: Maiores Descontos */}
+                <div className="dashboard-section">
+                  <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '22px', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                    <i className="fa-solid fa-fire" style={{ color: 'var(--accent-primary)' }}></i> Maiores Descontos
+                  </h3>
+                  {productsWithDiscounts.length > 0 ? (
+                    <div className="product-grid">
+                      {productsWithDiscounts.slice(0, 4).map(prod => (
+                        <ProductCard 
+                          key={prod.id} 
+                          product={prod} 
+                          viewMode="card"
+                          onDelete={handleDeleteProduct} 
+                          onShowHistory={handleShowHistory} 
+                          onRename={handleRenameProduct}
+                          onUpdateCollection={handleUpdateCollection}
+                          onUpdateTargetPrice={handleUpdateTargetPrice}
+                          onTogglePin={handleTogglePin}
+                          onToggleBudget={handleToggleBudget}
+                          isInBudget={budgetItemIds.includes(prod.id)}
+                          showPrompt={showCustomPrompt}
+                          showAlert={showCustomAlert}
+                        />
                       ))}
                     </div>
-                    <button 
-                      onClick={() => setIsBudgetOpen(true)}
-                      className="btn btn-secondary btn-full"
-                      style={{ fontSize: '12px', padding: '8px 16px' }}
-                    >
-                      <i className="fa-solid fa-expand"></i> Detalhar Simulação
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ textAlign: 'center', padding: '15px 0' }}>
-                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>Nenhum item selecionado para o orçamento ainda.</p>
-                    <button 
-                      onClick={() => setCurrentTab('watchlist')}
-                      className="btn btn-secondary btn-full"
-                      style={{ fontSize: '12px', padding: '8px 16px' }}
-                    >
-                      Ir para Watchlist
-                    </button>
-                  </div>
-                )}
-              </div>
+                  ) : (
+                    <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Nenhuma variação relevante detectada ainda.</p>
+                  )}
+                </div>
 
-              {/* Card 3: Status do Sistema e Agendamento */}
-              <div className="panel-card" style={{ padding: '24px' }}>
-                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 800, marginBottom: '20px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <i className="fa-solid fa-clock-rotate-left" style={{ color: 'var(--accent-primary)' }}></i> Atividades
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', fontSize: '13px' }}>
-                  
-                  {/* Última varredura */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Última Varredura:</span>
-                    <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {stats.last_scan_time ? (
-                        formatDateTime(stats.last_scan_time)
-                      ) : (
-                        'Nenhuma realizada'
-                      )}
-                    </span>
-                  </div>
-
-                  {/* Próxima varredura */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Próxima Varredura:</span>
-                    <span style={{ fontWeight: 700, color: 'var(--accent-emerald)' }}>
-                      {stats.next_scan_time ? (
-                        formatDateTime(stats.next_scan_time)
-                      ) : (
-                        'Agendada'
-                      )}
-                    </span>
-                  </div>
-
-                  <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '5px 0' }} />
-
-                  {/* Telegram Bot status */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Telegram Bot:</span>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--accent-emerald)', fontWeight: 700 }}>
-                      <span style={{ width: '6px', height: '6px', background: 'var(--accent-emerald)', borderRadius: '50%' }}></span> Ativo
-                    </span>
-                  </div>
-
+                {/* Box 2: Produtos Favoritos */}
+                <div className="dashboard-section">
+                  <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '22px', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                    <i className="fa-solid fa-star" style={{ color: 'var(--accent-primary)' }}></i> Produtos Favoritos
+                  </h3>
+                  {pinnedProducts.length > 0 ? (
+                    <div className="product-grid">
+                      {pinnedProducts.map(prod => (
+                        <ProductCard 
+                          key={prod.id} 
+                          product={prod} 
+                          viewMode="card"
+                          onDelete={handleDeleteProduct} 
+                          onShowHistory={handleShowHistory} 
+                          onRename={handleRenameProduct}
+                          onUpdateCollection={handleUpdateCollection}
+                          onUpdateTargetPrice={handleUpdateTargetPrice}
+                          onTogglePin={handleTogglePin}
+                          onToggleBudget={handleToggleBudget}
+                          isInBudget={budgetItemIds.includes(prod.id)}
+                          showPrompt={showCustomPrompt}
+                          showAlert={showCustomAlert}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Nenhum produto favoritado ou fixado no momento. Use a estrela ao lado do nome de qualquer produto para fixá-lo aqui.</p>
+                  )}
                 </div>
               </div>
 
-            </aside>
+              {/* Coluna da Direita (Painel Analítico Lateral) */}
+              <aside style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+                
+                {/* Card 1: Distribuição de Lojas */}
+                <div className="panel-card" style={{ padding: '24px' }}>
+                  <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 800, marginBottom: '20px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="fa-solid fa-chart-simple" style={{ color: 'var(--accent-primary)' }}></i> Cobertura de Lojas
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    {storeDistribution.map(item => (
+                      <div key={item.key} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 600 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+                            <i className={item.icon}></i> {item.name}
+                          </span>
+                          <span style={{ color: 'var(--text-primary)' }}>{item.count} {item.count === 1 ? 'item' : 'itens'}</span>
+                        </div>
+                        <div style={{ width: '100%', height: '6px', background: 'var(--bg-main)', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: `${item.pct}%`, height: '100%', background: 'var(--accent-emerald)', transition: 'width 0.5s ease-in-out' }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-          </div>
+                {/* Card 2: Meu Orçamento Atual */}
+                <div className="panel-card" style={{ padding: '24px' }}>
+                  <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 800, marginBottom: '15px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="fa-solid fa-calculator" style={{ color: 'var(--accent-primary)' }}></i> Meu Orçamento
+                  </h3>
+                  
+                  {budgetItems.length > 0 ? (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '15px' }}>
+                        <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 600 }}>Total Estimado</span>
+                        <span style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)' }}>{formatBRL(budgetTotal)}</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '15px', maxHeight: '140px', overflowY: 'auto', paddingRight: '4px' }}>
+                        {budgetItems.map(item => (
+                          <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '4px 0', borderBottom: '1px dashed var(--border-color)' }}>
+                            <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }} title={item.name}>{item.name}</span>
+                            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{formatBRL(item.last_price)}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <button 
+                        onClick={() => setIsBudgetOpen(true)}
+                        className="btn btn-secondary btn-full"
+                        style={{ fontSize: '12px', padding: '8px 16px' }}
+                      >
+                        <i className="fa-solid fa-expand"></i> Detalhar Simulação
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '15px 0' }}>
+                      <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>Nenhum item selecionado para o orçamento ainda.</p>
+                      <button 
+                        onClick={() => setCurrentTab('watchlist')}
+                        className="btn btn-secondary btn-full"
+                        style={{ fontSize: '12px', padding: '8px 16px' }}
+                      >
+                        Ir para Watchlist
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Card 3: Status do Sistema e Agendamento */}
+                <div className="panel-card" style={{ padding: '24px' }}>
+                  <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 800, marginBottom: '20px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="fa-solid fa-clock-rotate-left" style={{ color: 'var(--accent-primary)' }}></i> Atividades
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', fontSize: '13px' }}>
+                    
+                    {/* Última varredura */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Última Varredura:</span>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {stats.last_scan_time ? (
+                          formatDateTime(stats.last_scan_time)
+                        ) : (
+                          'Nenhuma realizada'
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Próxima varredura */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Próxima Varredura:</span>
+                      <span style={{ fontWeight: 700, color: 'var(--accent-emerald)' }}>
+                        {stats.next_scan_time ? (
+                          formatDateTime(stats.next_scan_time)
+                        ) : (
+                          'Agendada'
+                        )}
+                      </span>
+                    </div>
+
+                    <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '5px 0' }} />
+
+                    {/* Telegram Bot status */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Telegram Bot:</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--accent-emerald)', fontWeight: 700 }}>
+                        <span style={{ width: '6px', height: '6px', background: 'var(--accent-emerald)', borderRadius: '50%' }}></span> Ativo
+                      </span>
+                    </div>
+
+                  </div>
+                </div>
+
+              </aside>
+
+            </div>
+          )
         ) : (
           /* Watchlist View */
           <div className="dashboard-layout" style={{ display: 'block', width: '100%' }}>

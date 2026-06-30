@@ -2297,3 +2297,79 @@ body {
     box-shadow: 0 4px 12px var(--accent-primary-glow);
 }
 
+/* Option C: Carousel & Analytics Dashboard Layout */
+.dashboard-option-c-layout {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.carousel-section {
+    width: 100%;
+}
+
+.carousel-control-btn {
+    transition: var(--transition-smooth);
+}
+
+.carousel-control-btn:hover {
+    background: var(--bg-card-hover) !important;
+    border-color: var(--accent-primary) !important;
+    color: var(--accent-primary) !important;
+    transform: scale(1.05);
+}
+
+.carousel-track {
+    scrollbar-width: none; /* Firefox */
+}
+
+.carousel-track::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+}
+
+.carousel-card-item {
+    transition: transform 0.2s ease;
+}
+
+.carousel-card-item:hover {
+    transform: translateY(-4px);
+}
+
+.analytics-dashboard-grid {
+    width: 100%;
+}
+
+.analytics-main-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.tips-insights-stack {
+    height: 100%;
+}
+
+.tip-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+    transition: var(--transition-smooth);
+}
+
+.tip-card:hover {
+    transform: translateX(4px);
+    border-color: var(--border-glow);
+}
+
+@media (max-width: 1024px) {
+    .analytics-dashboard-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+
