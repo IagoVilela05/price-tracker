@@ -4,7 +4,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=root
+User=iago
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 WorkingDirectory=/home/iago/Documentos/Pessoal/price-tracker/backend
 ExecStart=/home/iago/Documentos/Pessoal/price-tracker/.venv/bin/uvicorn api:app --host 127.0.0.1 --port 80
 Restart=on-failure

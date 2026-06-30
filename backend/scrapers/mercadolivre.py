@@ -31,7 +31,6 @@ class MercadoLivreScraper(BaseScraper):
                 pass
             finally:
                 self.url = orig_url
-                
         return res
 
     def _extract_from_soup(self, soup) -> dict:
